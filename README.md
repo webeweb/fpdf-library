@@ -1,7 +1,7 @@
 fpdf-library
 ============
 
-[![composer.lock](https://poser.pugx.org/webeweb/core-library/composerlock)](https://packagist.org/packages/webeweb/core-library)
+[![Latest Stable Version](https://poser.pugx.org/webeweb/adminbsb-material-design-bundle/v/stable)](https://packagist.org/packages/webeweb/adminbsb-material-design-bundle) [![Latest Unstable Version](https://poser.pugx.org/webeweb/adminbsb-material-design-bundle/v/unstable)](https://packagist.org/packages/webeweb/adminbsb-material-design-bundle) [![composer.lock](https://poser.pugx.org/webeweb/core-library/composerlock)](https://packagist.org/packages/webeweb/core-library)
 
 FPDF is a PHP class which allows to generate PDF files with pure PHP, that is to
 say without using the PDFlib library. F from FPDF stands for Free: you may use
