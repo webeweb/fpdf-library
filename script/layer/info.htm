@@ -1,0 +1,35 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+<title>Layers</title>
+<style type="text/css">
+body {font-family:"Times New Roman",serif}
+h1 {font:bold 135% Arial,sans-serif; color:#4000A0; margin-bottom:0.9em}
+h2 {font:bold 95% Arial,sans-serif; color:#900000; margin-top:1.5em; margin-bottom:1em}
+</style>
+</head>
+<body>
+<h1>Layers</h1>
+<h2>Informations</h2>
+Author: <a href="mailto:oliver@fpdf.org?subject=Layers">Olivier</a><br>
+License: FPDF
+<h2>Description</h2>
+This script allows to define layers in the PDF. A layer is defined with this method:<br>
+<br>
+<tt><b>int</b> AddLayer(<b>string</b> name [, <b>boolean</b> isUTF8 [, <b>boolean</b> visible]])</tt><br>
+<br>
+<tt><u>name</u></tt>: the name of the layer<br>
+<tt><u>isUTF8</u></tt>: indicates if the name is encoded in ISO-8859-1 (<code>false</code>) or UTF-8
+(<code>true</code>). Default value: <tt>false</tt>.<br>
+<tt><u>visible</u></tt>: indicates if the layer is initially visible (default value: <code>true</code>)<br>
+<br>
+It returns an identifier that you can pass to <code>BeginLayer()</code> to start the layer. Then all
+the content you add to the page belongs to that layer until you call <code>EndLayer()</code>.<br>
+<br>
+The <code>OpenLayerPane()</code> method is also provided to force the PDF viewer to open the layer
+pane when the document is loaded.<br>
+<br>
+<strong>Note:</strong> layers are not supported by all PDF viewers.
+</body>
+</html>
