@@ -26,7 +26,7 @@ command to download the latest stable version of this package:
 
 ```bash
 
-$ composer require webeweb/fpdf-library "~1.0@dev"
+$ composer require webeweb/fpdf-library "1.81"
 
 ```
 
