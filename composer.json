@@ -1,8 +1,8 @@
 {
     "name": "webeweb/fpdf-library",
     "type": "library",
-    "description": "Integrate FPDF library in your projects",
-    "keywords": ["webeweb", "library", "fPDF", "PDF"],
+    "description": "Integrate FPDF with your projects",
+    "keywords": ["webeweb", "library", "FPDF", "PDF"],
     "homepage": "http://github.com/webeweb/fpdf-library",
     "license": "no usage restriction",
     "authors": [
