@@ -3,12 +3,12 @@
     "type": "library",
     "description": "Integrate FPDF with your projects",
     "keywords": ["webeweb", "library", "FPDF", "PDF"],
-    "homepage": "http://github.com/webeweb/fpdf-library",
+    "homepage": "https://github.com/webeweb/fpdf-library",
     "license": "LGPL-3.0-only",
     "authors": [
         {
             "name": "webeweb",
-            "homepage": "http://github.com/webeweb/"
+            "homepage": "https://github.com/webeweb/"
         },
         {
             "name": "Olivier Plathey",
@@ -23,7 +23,7 @@
         "phpunit/phpunit": "5.4.*"
     },
     "support": {
-        "issues": "http://github.com/webeweb/fpdf-library/issues"
+        "issues": "https://github.com/webeweb/fpdf-library/issues"
     },
     "autoload": {
         "classmap": [
