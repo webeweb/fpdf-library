@@ -1,9 +1,10 @@
 fpdf-library
 ============
 
-[![Latest Stable Version](https://poser.pugx.org/webeweb/fpdf-library/v/stable)](https://packagist.org/packages/webeweb/fpdf-library)
-[![Latest Unstable Version](https://poser.pugx.org/webeweb/fpdf-library/v/unstable)](https://packagist.org/packages/webeweb/fpdf-library)
-[![composer.lock](https://poser.pugx.org/webeweb/core-library/composerlock)](https://packagist.org/packages/webeweb/core-library)
+[![Latest Stable Version](https://img.shields.io/packagist/v/webeweb/fpdf-library.svg?style=flat-square)](https://packagist.org/packages/webeweb/fpdf-library)
+[![Latest Unstable Version](https://img.shields.io/packagist/vpre/webeweb/fpdf-library.svg?style=flat-square)](https://packagist.org/packages/webeweb/fpdf-library)
+[![License](https://img.shields.io/packagist/l/webeweb/fpdf-library.svg?style=flat-square)](https://packagist.org/packages/webeweb/fpdf-library)
+[![composer.lock](https://img.shields.io/badge/.lock-uncommited-important.svg?style=flat-square)](https://packagist.org/packages/webeweb/fpdf-library)
 
 FPDF is a PHP class which allows to generate PDF files with pure PHP, that is to
 say without using the PDFlib library. F from FPDF stands for Free: you may use
@@ -17,7 +18,7 @@ it for any kind of usage and modify it to suit your needs.
 
 ## Compatibility
 
-[![PHP](https://img.shields.io/badge/PHP-%5E5.6%7C%5E7.0-blue.svg)](http://php.net)
+[![PHP](https://img.shields.io/packagist/php-v/webeweb/fpdf-library.svg?style=flat-square)](http://php.net)
 
 ---
 
