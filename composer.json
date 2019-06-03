@@ -22,17 +22,17 @@
     "require-dev": {
         "phpunit/phpunit": "5.4.*"
     },
-    "support": {
-        "issues": "https://github.com/webeweb/fpdf-library/issues"
+    "extra": {
+        "branch-alias": {
+            "dev-master": "1.x-dev"
+        }
     },
     "autoload": {
         "classmap": [
             "fpdf.php"
         ]
     },
-    "extra": {
-        "branch-alias": {
-            "dev-master": "1.x-dev"
-        }
+    "support": {
+        "issues": "https://github.com/webeweb/fpdf-library/issues"
     }
 }
