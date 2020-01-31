@@ -1,9 +1,10 @@
 <?php
+
 require('postnet.php');
 
-$pdf = new PDF_POSTNET("P","pt");
+$pdf = new PDF_POSTNET("P", "pt");
 $pdf->AddPage();
-$pdf->SetFont("Arial","",10);
+$pdf->SetFont("Arial", "", 10);
 
 // ParseZipCode examples
 //$stringToParse = "Ann Arbor, MI 48109-110asdf"; // returns "48109"
@@ -15,8 +16,8 @@ $pdf->SetFont("Arial","",10);
 $stringToParse = "Ann Arbor, MI 48109-1109"; // perfect, returns "48109-1109"
 
 $zipcode = $pdf->ParseZipCode($stringToParse);
-$pdf->POSTNETBarCode(40,40,$zipcode);
-$pdf->Text(40,90,$zipcode);
+$pdf->POSTNETBarCode(40, 40, $zipcode);
+$pdf->Text(40, 90, $zipcode);
 
 $pdf->Output();
 ?>

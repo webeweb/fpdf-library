@@ -1,4 +1,5 @@
 <?php
+
 require_once('named_destinations.php');
 
 $pdf = new PDF_NamedDestinations();

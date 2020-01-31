@@ -1,61 +1,59 @@
 <?php
+
 require('fpdf_thai.php');
 
-class PDF extends FPDF_Thai
-{
-function Header()
-{
-	$this->SetFont('AngsanaNew','BU',40);
-	$this->Cell(190,10,'ÁËÒÇÔ·ÂÒÅÑÂºÙÃ¾Ò',0,0,'C');
-	$this->Ln(20);
+class PDF extends FPDF_Thai {
+
+    function ColorTable($header, $data) {
+        //Colors, line width and bold font
+        $this->SetFillColor(255, 0, 0);
+        $this->SetTextColor(255);
+        $this->SetDrawColor(128, 0, 0);
+        $this->SetLineWidth(.3);
+        $this->SetFont('', 'B');
+        //Header
+        $w = [40, 35, 40, 45];
+        for ($i = 0; $i < count($header); $i++)
+            $this->Cell($w[$i], 7, $header[$i], 1, 0, 'C', 1);
+        $this->Ln();
+        //Color and font restoration
+        $this->SetFillColor(224, 235, 255);
+        $this->SetTextColor(0);
+        $this->SetFont('');
+        //Data
+        $fill = 0;
+        foreach ($data as $row) {
+            $this->Cell($w[0], 6, $row[0], 'LR', 0, 'L', $fill);
+            $this->Cell($w[1], 6, $row[1], 'LR', 0, 'L', $fill);
+            $this->Cell($w[2], 6, $row[2], 'LR', 0, 'C', $fill);
+            $this->Cell($w[3], 6, number_format($row[3]), 'LR', 0, 'R', $fill);
+            $this->Ln();
+            $fill = !$fill;
+        }
+        $this->Cell(array_sum($w), 0, '', 'T');
+    }
+
+    function Header() {
+        $this->SetFont('AngsanaNew', 'BU', 40);
+        $this->Cell(190, 10, 'ï¿½ï¿½ï¿½ï¿½Ô·ï¿½ï¿½ï¿½ï¿½Âºï¿½Ã¾ï¿½', 0, 0, 'C');
+        $this->Ln(20);
+    }
 }
 
-function ColorTable($header,$data)
-{
-	//Colors, line width and bold font
-	$this->SetFillColor(255,0,0);
-	$this->SetTextColor(255);
-	$this->SetDrawColor(128,0,0);
-	$this->SetLineWidth(.3);
-	$this->SetFont('','B');
-	//Header
-	$w=array(40,35,40,45);
-	for($i=0;$i<count($header);$i++)
-		$this->Cell($w[$i],7,$header[$i],1,0,'C',1);
-	$this->Ln();
-	//Color and font restoration
-	$this->SetFillColor(224,235,255);
-	$this->SetTextColor(0);
-	$this->SetFont('');
-	//Data
-	$fill=0;
-	foreach($data as $row)
-	{
-		$this->Cell($w[0],6,$row[0],'LR',0,'L',$fill);
-		$this->Cell($w[1],6,$row[1],'LR',0,'L',$fill);
-		$this->Cell($w[2],6,$row[2],'LR',0,'C',$fill);
-		$this->Cell($w[3],6,number_format($row[3]),'LR',0,'R',$fill);
-		$this->Ln();
-		$fill=!$fill;
-	}
-	$this->Cell(array_sum($w),0,'','T');
-}
-}
-
-$pdf=new PDF();
-$pdf->AddFont('AngsanaNew','','angsa.php');
-$pdf->AddFont('AngsanaNew','B','angsab.php');
+$pdf = new PDF();
+$pdf->AddFont('AngsanaNew', '', 'angsa.php');
+$pdf->AddFont('AngsanaNew', 'B', 'angsab.php');
 $pdf->AddPage();
-$pdf->SetFont('AngsanaNew','',12);
+$pdf->SetFont('AngsanaNew', '', 12);
 //Column titles
-$header=array('ª×èÍ','¹ÒÁÊ¡ØÅ','ÃËÑÊ¹ÔÊÔµ','¤èÒãªé¨èÒÂ/à´×Í¹');
+$header = ['ï¿½ï¿½ï¿½ï¿½', 'ï¿½ï¿½ï¿½Ê¡ï¿½ï¿½', 'ï¿½ï¿½ï¿½Ê¹ï¿½ï¿½Ôµ', 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½/ï¿½ï¿½Í¹'];
 //Read file lines
-$lines=file('student.txt');
-$data=array();
-foreach($lines as $line)
-	$data[]=explode(';',chop($line));
+$lines = file('student.txt');
+$data  = [];
+foreach ($lines as $line)
+    $data[] = explode(';', chop($line));
 //Output table
-$pdf->ColorTable($header,$data);
+$pdf->ColorTable($header, $data);
 
 $pdf->Output();
 ?>

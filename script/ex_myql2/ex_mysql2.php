@@ -11,7 +11,7 @@ require('fpdf.php');
 include("conectmysql.php");
 
 //Create new pdf file
-$pdf=new FPDF();
+$pdf = new FPDF();
 
 //Disable automatic page break
 $pdf->SetAutoPageBreak(false);
@@ -23,18 +23,18 @@ $pdf->AddPage();
 $y_axis_initial = 25;
 
 //print column titles
-$pdf->SetFillColor(232,232,232);
-$pdf->SetFont('Arial','B',12);
+$pdf->SetFillColor(232, 232, 232);
+$pdf->SetFont('Arial', 'B', 12);
 $pdf->SetY($y_axis_initial);
 $pdf->SetX(25);
-$pdf->Cell(30,6,'CODE',1,0,'L',1);
-$pdf->Cell(100,6,'NAME',1,0,'L',1);
-$pdf->Cell(30,6,'PRICE',1,0,'R',1);
+$pdf->Cell(30, 6, 'CODE', 1, 0, 'L', 1);
+$pdf->Cell(100, 6, 'NAME', 1, 0, 'L', 1);
+$pdf->Cell(30, 6, 'PRICE', 1, 0, 'R', 1);
 
 $y_axis = $y_axis + $row_height;
 
 //Select the Products you want to show in your PDF file
-$result=mysql_query('select Code,Name,Price from Products ORDER BY Code',$link);
+$result = mysql_query('select Code,Name,Price from Products ORDER BY Code', $link);
 
 //initialize counter
 $i = 0;
@@ -45,40 +45,38 @@ $max = 25;
 //Set Row Height
 $row_height = 6;
 
-while($row = mysql_fetch_array($result))
-{
-	//If the current row is the last one, create new page and print column title
-	if ($i == $max)
-	{
-		$pdf->AddPage();
+while ($row = mysql_fetch_array($result)) {
+    //If the current row is the last one, create new page and print column title
+    if ($i == $max) {
+        $pdf->AddPage();
 
-		//print column titles for the current page
-		$pdf->SetY($y_axis_initial);
-		$pdf->SetX(25);
-		$pdf->Cell(30,6,'CODE',1,0,'L',1);
-		$pdf->Cell(100,6,'NAME',1,0,'L',1);
-		$pdf->Cell(30,6,'PRICE',1,0,'R',1);
-		
-		//Go to next row
-		$y_axis = $y_axis + $row_height;
-		
-		//Set $i variable to 0 (first row)
-		$i = 0;
-	}
+        //print column titles for the current page
+        $pdf->SetY($y_axis_initial);
+        $pdf->SetX(25);
+        $pdf->Cell(30, 6, 'CODE', 1, 0, 'L', 1);
+        $pdf->Cell(100, 6, 'NAME', 1, 0, 'L', 1);
+        $pdf->Cell(30, 6, 'PRICE', 1, 0, 'R', 1);
 
-	$code = $row['Code'];
-	$price = $row['Price'];
-	$name = $row['Code'];
+        //Go to next row
+        $y_axis = $y_axis + $row_height;
 
-	$pdf->SetY($y_axis);
-	$pdf->SetX(25);
-	$pdf->Cell(30,6,$code,1,0,'L',1);
-	$pdf->Cell(100,6,$name,1,0,'L',1);
-	$pdf->Cell(30,6,$price,1,0,'R',1);
+        //Set $i variable to 0 (first row)
+        $i = 0;
+    }
 
-	//Go to next row
-	$y_axis = $y_axis + $row_height;
-	$i = $i + 1;
+    $code  = $row['Code'];
+    $price = $row['Price'];
+    $name  = $row['Code'];
+
+    $pdf->SetY($y_axis);
+    $pdf->SetX(25);
+    $pdf->Cell(30, 6, $code, 1, 0, 'L', 1);
+    $pdf->Cell(100, 6, $name, 1, 0, 'L', 1);
+    $pdf->Cell(30, 6, $price, 1, 0, 'R', 1);
+
+    //Go to next row
+    $y_axis = $y_axis + $row_height;
+    $i      = $i + 1;
 }
 
 mysql_close($link);

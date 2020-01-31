@@ -1,7 +1,8 @@
 <?php
+
 require('rounded_rect.php');
 
-$pdf=new PDF();
+$pdf = new PDF();
 $pdf->AddPage();
 $pdf->SetLineWidth(0.5);
 $pdf->SetFillColor(192);

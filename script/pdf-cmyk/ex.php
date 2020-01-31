@@ -1,4 +1,5 @@
 <?php
+
 require('pdf-cmyk.php');
 
 $pdf = new cmykPDF();

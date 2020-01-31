@@ -1,4 +1,5 @@
 <?php
+
 require('bookmark.php');
 
 $pdf = new PDF_Bookmark();

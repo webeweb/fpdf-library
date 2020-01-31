@@ -1,10 +1,11 @@
 <?php
+
 require('diag.php');
 
 $pdf = new PDF_Diag();
 $pdf->AddPage();
 
-$data = array('Men' => 1510, 'Women' => 1610, 'Children' => 1400);
+$data = ['Men' => 1510, 'Women' => 1610, 'Children' => 1400];
 
 //Pie chart
 $pdf->SetFont('Arial', 'BIU', 12);
@@ -26,10 +27,10 @@ $pdf->Ln();
 $pdf->Ln(8);
 
 $pdf->SetXY(90, $valY);
-$col1=array(100,100,255);
-$col2=array(255,100,100);
-$col3=array(255,255,100);
-$pdf->PieChart(100, 35, $data, '%l (%p)', array($col1,$col2,$col3));
+$col1 = [100, 100, 255];
+$col2 = [255, 100, 100];
+$col3 = [255, 255, 100];
+$pdf->PieChart(100, 35, $data, '%l (%p)', [$col1, $col2, $col3]);
 $pdf->SetXY($valX, $valY + 40);
 
 //Bar diagram
@@ -38,7 +39,7 @@ $pdf->Cell(0, 5, '2 - Bar diagram', 0, 1);
 $pdf->Ln(8);
 $valX = $pdf->GetX();
 $valY = $pdf->GetY();
-$pdf->BarDiagram(190, 70, $data, '%l : %v (%p)', array(255,175,100));
+$pdf->BarDiagram(190, 70, $data, '%l : %v (%p)', [255, 175, 100]);
 $pdf->SetXY($valX, $valY + 80);
 
 $pdf->Output();

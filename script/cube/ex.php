@@ -1,9 +1,10 @@
 <?php
+
 require('cube.php');
 
-$a = 50;
-$b = 50;
-$c = 50;
+$a     = 50;
+$b     = 50;
+$c     = 50;
 $scale = .6;
 $alfax = 20;
 $alfay = 20;

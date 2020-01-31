@@ -1,8 +1,8 @@
 <?php
 
 /***************************
-  Sample using an FDF file
-****************************/
+ * Sample using an FDF file
+ ****************************/
 
 require('fpdm.php');
 

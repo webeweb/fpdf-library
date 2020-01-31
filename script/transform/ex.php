@@ -1,9 +1,10 @@
 <?php
+
 require('transform.php');
 
 $pdf = new PDF_Transform();
 $pdf->AddPage();
-$pdf->SetFont('Arial','',12);
+$pdf->SetFont('Arial', '', 12);
 
 //Scaling
 $pdf->SetDrawColor(200);
@@ -111,25 +112,32 @@ $pdf->SetTextColor(0);
 //Start Transformation
 $pdf->StartTransform();
 //point reflection at the lower left point of rectangle
-$pdf->MirrorP(50,120);
+$pdf->MirrorP(50, 120);
 $pdf->Rect(50, 110, 40, 10, 'D');
 $pdf->Text(50, 109, 'MirrorP');
 //Stop Transformation
 $pdf->StopTransform();
 
-//Mirroring against a straigth line described by a point (120, 120) and an angle -20°
-$angle=-20;
-$px=120;
-$py=120;
+//Mirroring against a straigth line described by a point (120, 120) and an angle -20ï¿½
+$angle = -20;
+$px    = 120;
+$py    = 120;
 
 /* */ //just vor visualisation: the straight line to mirror against
-/* */ $pdf->SetDrawColor(200);
-/* */ $pdf->Line($px-1,$py-1,$px+1,$py+1);
-/* */ $pdf->Line($px-1,$py+1,$px+1,$py-1);
-/* */ $pdf->StartTransform();
-/* */ $pdf->Rotate($angle, $px, $py);
-/* */ $pdf->Line($px-5, $py, $px+60, $py);
-/* */ $pdf->StopTransform();
+/* */
+$pdf->SetDrawColor(200);
+/* */
+$pdf->Line($px - 1, $py - 1, $px + 1, $py + 1);
+/* */
+$pdf->Line($px - 1, $py + 1, $px + 1, $py - 1);
+/* */
+$pdf->StartTransform();
+/* */
+$pdf->Rotate($angle, $px, $py);
+/* */
+$pdf->Line($px - 5, $py, $px + 60, $py);
+/* */
+$pdf->StopTransform();
 
 $pdf->SetDrawColor(200);
 $pdf->SetTextColor(200);

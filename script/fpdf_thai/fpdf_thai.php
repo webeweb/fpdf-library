@@ -1,647 +1,579 @@
 <?php
 /*******************************************************************************
-* FPDF Thai Positioning Improve                                                *
-*                                                                              *
-* Version:  1.01                                                               *
-* Date:     2009-10-08                                                         *
-* Advisor:  Mr. Wittawas Puntumchinda                                          *
-* Coding:   Mr. Sirichai Fuangfoo                                              *
-* License:  FPDF                                                               *
-*******************************************************************************/
+ * FPDF Thai Positioning Improve                                                *
+ *                                                                              *
+ * Version:  1.01                                                               *
+ * Date:     2009-10-08                                                         *
+ * Advisor:  Mr. Wittawas Puntumchinda                                          *
+ * Coding:   Mr. Sirichai Fuangfoo                                              *
+ * License:  FPDF                                                               *
+ *******************************************************************************/
 
 require('fpdf.php');
 
-class FPDF_Thai extends FPDF
-{
-var $txt_error;	
-var $s_error;
-var $string_th;
-var $s_th;
-var $pointX;
-var $pointY;
-var $curPointX;
-var $checkFill;
-var $array_th;
+class FPDF_Thai extends FPDF {
 
-/****************************************************************************************
-* »ÃÐàÀ·: Function ¢Í§ Class FPDF_TH													
-* ÍéÒ§ÍÔ§: Function MultiCell ¢Í§ Class FPDF											
-* ¡ÒÃ·Ó§Ò¹: ãªéã¹¡ÒÃ¾ÔÁ¾ì¢éÍ¤ÇÒÁËÅÒÂºÃÃ·Ñ´¢Í§àÍ¡ÊÒÃ PDF 										
-* ÃÙºáºº: MultiCell (	$w = ¤ÇÒÁ¡ÇéÒ§¢Í§Cell,												
-*						$h = ¤ÇÒÁÊÙ§¢Í§Cell,												
-*						$txt = ¢éÍ¤ÇÒÁ·Õè¨Ð¾ÔÁ¾ì,													
-*						$border = ¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº(0 = äÁèáÊ´§, 1= áÊ´§)	,				
-*						$align = µÓáË¹è§¢éÍ¤ÇÒÁ(L = «éÒÂ, R = ¢ÇÒ, C = ¡Öè§¡ÅÒ§, J = ¡ÃÐ¨ÒÂ),
-*						$fill = ¡ÓË¹´¡ÒÃáÊ´§ÊÕ¢Í§Cell(false = äÁèáÊ´§, true = áÊ´§)					
-*					)			
-*****************************************************************************************/
-function MultiCell($w, $h, $txt, $border=0, $align='J', $fill=false)
-{
-	//Output text with automatic or explicit line breaks
-	$cw=&$this->CurrentFont['cw'];
-	if($w==0)
-		$w=$this->w-$this->rMargin-$this->x;
-	$wmax=($w-2*$this->cMargin)*1000/$this->FontSize;
-	$s=str_replace("\r",'',$txt);
-	$nb=strlen($s);
-	if($nb>0 && $s[$nb-1]=="\n")
-		$nb--;
-	$b=0;
-	if($border)
-	{
-		if($border==1)
-		{
-			$border='LTRB';
-			$b='LRT';
-			$b2='LR';
-		}
-		else
-		{
-			$b2='';
-			if(strpos($border,'L')!==false)
-				$b2.='L';
-			if(strpos($border,'R')!==false)
-				$b2.='R';
-			$b=(strpos($border,'T')!==false) ? $b2.'T' : $b2;
-		}
-	}
-	$sep=-1;
-	$i=0;
-	$j=0;
-	$l=0;
-	$ns=0;
-	$nl=1;
-	while($i<$nb)
-	{
-		//Get next character
-		$c=$s{$i};
-		if($c=="\n")
-		{
-			//Explicit line break
-			if($this->ws>0)
-			{
-				$this->ws=0;
-				$this->_out('0 Tw');
-			}
-			$this->MCell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill);
-			$i++;
-			$sep=-1;
-			$j=$i;
-			$l=0;
-			$ns=0;
-			$nl++;
-			if($border && $nl==2)
-				$b=$b2;
-			continue;
-		}
-		if($c==' ')
-		{
-			$sep=$i;
-			$ls=$l;
-			$ns++;
-		}
-		$l+=$cw[$c];
-		if($l>$wmax)
-		{
-			//Automatic line break
-			if($sep==-1)
-			{
-				if($i==$j)
-					$i++;
-				if($this->ws>0)
-				{
-					$this->ws=0;
-					$this->_out('0 Tw');
-				}
-				$this->MCell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill);
-			}
-			else
-			{
-				if($align=='J')
-				{
-					$this->ws=($ns>1) ? ($wmax-$ls)/1000*$this->FontSize/($ns-1) : 0;
-					$this->_out(sprintf('%.3F Tw',$this->ws*$this->k));
-				}
-				$this->MCell($w,$h,substr($s,$j,$sep-$j),$b,2,$align,$fill);
-				$i=$sep+1;
-			}
-			$sep=-1;
-			$j=$i;
-			$l=0;
-			$ns=0;
-			$nl++;
-			if($border && $nl==2)
-				$b=$b2;
-		}
-		else
-			$i++;
-	}
-	//Last chunk
-	if($this->ws>0)
-	{
-		$this->ws=0;
-		$this->_out('0 Tw');
-	}
-	if($border && strpos($border,'B')!==false)
-		$b.='B';
-	$this->MCell($w,$h,substr($s,$j,$i-$j),$b,2,$align,$fill);
-	$this->x=$this->lMargin;
-}
+    var $array_th;
 
-/****************************************************************************************
-* »ÃÐàÀ·  : Function	¢Í§ Class FPDF_TH													
-* ÍéÒ§ÍÔ§	   : Function Cell	¢Í§ Class FPDF												
-* ¡ÒÃ·Ó§Ò¹  : ãªéã¹¡ÒÃ¾ÔÁ¾ì¢éÍ¤ÇÒÁ·ÕÅÐºÃÃ·Ñ´¢Í§àÍ¡ÊÒÃ PDF 											
-* ÃÙºáºº  : Cell (	$w = ¤ÇÒÁ¡ÇéÒ§¢Í§Cell,													
-*					$h = ¤ÇÒÁÊÙ§¢Í§Cell,													
-*					$txt = ¢éÍ¤ÇÒÁ·Õè¨Ð¾ÔÁ¾ì,													
-*					$border = ¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº(0 = äÁèáÊ´§, 1= áÊ´§),					
-*					$ln = µÓáË¹è§·ÕèÍÂÙè¶Ñ´ä»¨Ò¡à«ÅÅì(0 = ¢ÇÒ, 1 = ºÃÃ·Ñ´¶Ñ´ä», 2 = ´éÒ¹ÅèÒ§),
-*					$align = µÓáË¹è§¢éÍ¤ÇÒÁ(L = «éÒÂ, R = ¢ÇÒ, C = ¡Öè§¡ÅÒ§, T = º¹, B = ÅèÒ§),	
-*					$fill = ¡ÓË¹´¡ÒÃáÊ´§ÊÕ¢Í§Cell(false = äÁèáÊ´§, true = áÊ´§),					
-*					$link = URL ·ÕèµéÍ§¡ÒÃãËé¢éÍ¤ÇÒÁàª×èÍÁâÂ§ä»¶Ö§									
-*				)	
-*****************************************************************************************/
-function Cell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='')
-{
-	$this->checkFill="";
-	$k=$this->k;
-	if($this->y+$h>$this->PageBreakTrigger && !$this->InHeader && !$this->InFooter && $this->AcceptPageBreak())
-	{
-		//¢Öé¹Ë¹éÒãËÁèÍÑµâ¹ÁÑµ
-		$x=$this->x;
-		$ws=$this->ws;
-		if($ws>0)
-		{
-			$this->ws=0;
-			$this->_out('0 Tw');
-		}
-		$this->AddPage($this->CurOrientation);
-		$this->x=$x;
-		if($ws>0)
-		{
-			$this->ws=$ws;
-			$this->_out(sprintf('%.3F Tw',$ws*$k));
-		}
-	}
-	//¡ÓË¹´¤ÇÒÁ¡ÇéÒ§à«ÅÅìà·èÒ¡ÑºË¹éÒ¡ÃÐ´ÒÉ
-	if($w==0)
-		$w=$this->w-$this->rMargin-$this->x;
-	$this->s_th='';
-	//¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº 4 ´éÒ¹ áÅÐÊÕ¡ÃÍº
-	if($fill || $border==1)
-	{
-		if($fill)
-			$op=($border==1) ? 'B' : 'f';
-		else
-			$op='S';
-		$this->s_th=sprintf('%.2F %.2F %.2F %.2F re %s ',$this->x*$k,($this->h-$this->y)*$k,$w*$k,-$h*$k,$op);
-		if($op=='f')
-			$this->checkFill=$op;
-	}
-	//¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº·ÕÅÐàÊé¹
-	if(is_string($border))
-	{
-		$x=$this->x;
-		$y=$this->y;
-		if(strpos($border,'L')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-$y)*$k,$x*$k,($this->h-($y+$h))*$k);
-		if(strpos($border,'T')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-$y)*$k,($x+$w)*$k,($this->h-$y)*$k);
-		if(strpos($border,'R')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',($x+$w)*$k,($this->h-$y)*$k,($x+$w)*$k,($this->h-($y+$h))*$k);
-		if(strpos($border,'B')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-($y+$h))*$k,($x+$w)*$k,($this->h-($y+$h))*$k);
-	}
+    var $checkFill;
 
+    var $curPointX;
 
-	if($txt!=='')
-	{			
-		$x=$this->x;
-		$y=$this->y;
-		//¡ÓË¹´¡ÒÃ¨Ñ´¢éÍ¤ÇÒÁã¹à«ÅÅìµÒÁá¹ÇÃÐ´Ñº
-		if(strpos($align,'R')!==false)
-			$dx=$w-$this->cMargin-$this->GetStringWidth($txt);
-		elseif(strpos($align,'C')!==false)
-			$dx=($w-$this->GetStringWidth($txt))/2;
-		else
-			$dx=$this->cMargin;
-		//¡ÓË¹´¡ÒÃ¨Ñ´¢éÍ¤ÇÒÁã¹à«ÅÅìµÒÁá¹Ç´Ôè§
-		if(strpos($align,'T')!==false)
-			$dy=$h-(.7*$this->k*$this->FontSize);
-		elseif(strpos($align,'B')!==false)
-			$dy=$h-(.3*$this->k*$this->FontSize);
-		else
-			$dy=.5*$h;
-		//¡ÓË¹´¡ÒÃ¢Õ´àÊé¹ãµé¢éÍ¤ÇÒÁ
-		if($this->underline)
-		{	
-			//¡ÓË¹´ºÑ¹·Ö¡¡ÃÒ¿Ô¡
-			if($this->ColorFlag)
-				$this->s_th.=' q '.$this->TextColor.' ';
-			//¢Õ´àÊé¹ãµé¢éÍ¤ÇÒÁ0
-			$this->s_th.=' '.$this->_dounderline($this->x+$dx,$this->y+.5*$h+.3*$this->FontSize,$txt);
-			//¡ÓË¹´¤×¹¤èÒ¡ÃÒ¿Ô¡
-			if($this->ColorFlag)
-				$this->s_th.=' Q ';
-		}
-		//¡ÓË¹´¢éÍ¤ÇÒÁàª×èÍÁâÂ§ä»¶Ö§
-		if($link)
-			$this->Link($this->x,$this->y,$this->GetStringWidth($txt),$this->FontSize,$link);
-		/*if($s)
-			$this->_out($s);
-		$s='';*/
-		//µÑ´ÍÑ¡ÉÃÍÍ¡¨Ò¡¢éÍ¤ÇÒÁ ·ÕÅÐµÑÇà¡çºÅ§ÍÐàÃÂì
-		$this->array_th=substr($txt,0);
-		$i=0;
-		$this->pointY=($this->h-($y+$dy+.3*$this->FontSize))*$k;
-		$this->curPointX=($x+$dx)*$k;
-		$this->string_th='';
-		$this->txt_error=0;
+    var $pointX;
 
-		while($i<strlen($txt))
-		{	
-			//¡ÓË¹´µÓáË¹è§·Õè¨Ð¾ÔÁ¾ìÍÑ¡ÉÃã¹à«ÅÅì
-			if(strpos('èéêëìÔÕÖ×çÑÓØÙ',$this->array_th[$i])!==false)
-			{
-				$pX=$x+$dx;
-				if($i>0)
-					$pX+=.02*$this->GetStringWidth($this->array_th[$i-1]);
-				$this->pointX=$pX*$k;
-				//µÃÇ¨ÊÍºÍÑ¡ÉÃ »ÃÑºµÓáË¹è§áÅÐ·Ó¡ÒÃ¾ÔÁ¾ì
-				$this->_checkT($i);
+    var $pointY;
 
-				if($this->txt_error==0)
-					$this->string_th.=$this->array_th[$i];
-				else
-				{
-					$this->txt_error=0;
-				}
-			}
-			else
-				$this->string_th.=$this->array_th[$i];
+    var $s_error;
 
-			//àÅ×èÍ¹µÓáË¹è§ x ä»·ÕèµÑÇ·Õè¨Ð¾ÔÁ¾ì¶Ñ´ä»
-			$x=$x+$this->GetStringWidth($this->array_th[$i]);
-			$i++;
-		}
-		$this->TText($this->curPointX,$this->pointY,$this->string_th);
-		/*$this->s_th.=$this->s_hidden.$this->s_error;*/
-		//$this->s_th.=$this->s_error;
-		if($this->s_th)
-			$this->_out($this->s_th);
-	}
-	else
-		//¹Ó¤èÒä»áÊ´§àÁ×èÍäÁèÁÕ¢éÍ¤ÇÒÁ
-		$this->_out($this->s_th);
+    var $s_th;
 
-	$this->lasth=$h;
-	//µÃÇ¨ÊÍº¡ÒÃÇÒ§µÓáË¹è§¢Í§à«ÅÅì¶Ñ´ä»
-	if($ln>0)
-	{
-		//¢Öé¹ºÃÃ·Ñ´ãËÁè
-		$this->y+=$h;
-		if($ln==1)
-			$this->x=$this->lMargin;
-	}
-	else
-		$this->x+=$w;
-}
+    var $string_th;
 
-/********************************************************************************
-* ãªé§Ò¹: Function	Cell ¢Í§ Class FPDF_TH										
-* ¡ÒÃ·Ó§Ò¹: ãªéã¹¡ÒÃµÃÇ¨ÊÍºÍÑ¡ÉÃ áÅÐ»ÃÑºµÓáË¹è§¡èÍ¹·Õè¨Ð·Ó¡ÒÃ¾ÔÁ¾ì							
-* ¤ÇÒÁµéÍ§¡ÒÃ: $this->array_th = ÍÐàÃÂì¢Í§ÍÑ¡ÉÃ·ÕèµÑ´ÍÍ¡¨Ò¡¢éÍ¤ÇÒÁ						
-*						$i = ÅÓ´Ñº»Ñ¨¨ØºÑ¹ã¹ÍÐàÃÂì·Õè¨Ð·Ó¡ÒÃµÃÇ¨ÊÍº						
-*						$s = ÊÒÂÍÑ¡¢ÃÐ¢Í§â¤´ PDF
-*********************************************************************************/
-function _checkT($i)
-{   
-	$pointY=$this->pointY;
-	$pointX=$this->pointX;
-	$nb=strlen($this->array_th);
-	//µÇ¨ÊÍº¡ÒÃáÊ´§¼Å¢Í§µÑÇÍÑ¡ÉÃàË¹×ÍÊÃÐº¹
-	if($this->_errorTh($this->array_th[$i])==1)
-	{
-		//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃ¡èÍ¹Ë¹éÒ¹Ñé¹äÁèãªèÊÃÐº¹ »ÃÑºµÓáË¹è§Å§	
-		if(($this->_errorTh($this->array_th[$i-1])!=2)&&($this->array_th[$i+1]!="Ó"))
-		{
-			//¶éÒµÑÇ¹Ñé¹à»ç¹äÁéàÍ¡ËÃ×ÍäÁé¨ÑµÇÒ
-			if($this->array_th[$i]=="è"||$this->array_th[$i]=="ë")
-			{
-				$pointY=$this->pointY-.2*$this->FontSize*$this->k;
-				$this->txt_error=1;
-			}
-			//¶éÒµÑÇ¹Ñé¹à»ç¹äÁéâ·ËÃ×ÍäÁéµÃÕ
-			elseif($this->array_th[$i]=='é'||$this->array_th[$i]=='ê')
-			{
-				$pointY=$this->pointY-.23*$this->FontSize*$this->k;
-				$this->txt_error=1;
-			}
-			//¶éÒµÑÇ¹Ñé¹à»ç¹¡ÒÃÑ¹µì
-			else
-			{
-				$pointY=$this->pointY-.17*$this->FontSize*$this->k;
-				$this->txt_error=1;
-			}
-		}
-			
-		//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃµÑÇ¡èÍ¹Ë¹éÒ¹Ñé¹à»ç¹µÑÇÍÑ¡ÉÃËÒ§ÂÒÇº¹
-		if($this->_errorTh($this->array_th[$i-1])==3)		
-		{
-			//¶éÒµÑÇ¹Ñé¹à»ç¹äÁéàÍ¡ËÃ×ÍäÁé¨ÑµÇÒ
-			if($this->array_th[$i]=="è"||$this->array_th[$i]=="ë")
-			{
-				$pointX=$this->pointX-.17*$this->GetStringWidth($this->array_th[$i-1])*$this->k;
-				$this->txt_error=1;
-			}
-			//¶éÒµÑÇ¹Ñé¹à»ç¹äÁéâ·ËÃ×ÍäÁéµÃÕ
-			elseif($this->array_th[$i]=='é'||$this->array_th[$i]=='ê')
-			{			
-				$pointX=$this->pointX-.25*$this->GetStringWidth($this->array_th[$i-1])*$this->k;
-				$this->txt_error=1;
-			}
-			//¶éÒµÑÇ¹Ñé¹à»ç¹¡ÒÃÑ¹µì
-			else
-			{
-				$pointX=$this->pointX-.4*$this->GetStringWidth($this->array_th[$i-1])*$this->k;
-				$this->txt_error=1;
-			}
-		}
+    var $txt_error;
 
-		//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃµÑÇ¡èÍ¹Ë¹éÒ¹Ñé¹ä»ÍÕ¡à»ç¹µÑÇÍÑ¡ÉÃËÒ§ÂÒÇº¹	
-		if($i>=2 && $this->_errorTh($this->array_th[$i-2])==3)	
-		{					
-			//¶éÒµÑÇ¹Ñé¹à»ç¹äÁéàÍ¡ËÃ×ÍäÁé¨ÑµÇÒ
-			if($this->array_th[$i]=="è"||$this->array_th[$i]=="ë")
-			{
-				$pointX=$this->pointX-.17*$this->GetStringWidth($this->array_th[$i-2])*$this->k;
-				$this->txt_error=1;
-			}
-			//¶éÒµÑÇ¹Ñé¹à»ç¹äÁéâ·ËÃ×ÍäÁéµÃÕ
-			elseif($this->array_th[$i]=='é'||$this->array_th[$i]=='ê')
-			{						
-				$pointX=$this->pointX-.25*$this->GetStringWidth($this->array_th[$i-2])*$this->k;
-				$this->txt_error=1;
-			}
-			//¶éÒµÑÇ¹Ñé¹à»ç¹¡ÒÃÑ¹µì
-			else
-			{
-				$pointX=$this->pointX-.4*$this->GetStringWidth($this->array_th[$i-2])*$this->k;						
-				$this->txt_error=1;
-			}
-		}
-	}
-	//¨º¡ÒÃµÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃàË¹×ÍÊÃÐº¹
+    /****************************************************************************************
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½  : Function    ï¿½Í§ Class FPDF_TH
+     * ï¿½ï¿½Ò§ï¿½Ô§       : Function Cell    ï¿½Í§ Class FPDF
+     * ï¿½ï¿½Ã·Ó§Ò¹  : ï¿½ï¿½ã¹¡ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½Ã·Ñ´ï¿½Í§ï¿½Í¡ï¿½ï¿½ï¿½ PDF
+     * ï¿½Ùºáºº  : Cell (    $w = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§ï¿½Í§Cell,
+     *                    $h = ï¿½ï¿½ï¿½ï¿½ï¿½Ù§ï¿½Í§Cell,
+     *                    $txt = ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½,
+     *                    $border = ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íº(0 = ï¿½ï¿½ï¿½ï¿½Ê´ï¿½, 1= ï¿½Ê´ï¿½),
+     *                    $ln = ï¿½ï¿½ï¿½Ë¹è§·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ä»¨Ò¡ï¿½ï¿½ï¿½ï¿½(0 = ï¿½ï¿½ï¿½, 1 = ï¿½ï¿½Ã·Ñ´ï¿½Ñ´ï¿½, 2 = ï¿½ï¿½Ò¹ï¿½ï¿½Ò§),
+     *                    $align = ï¿½ï¿½ï¿½Ë¹è§¢ï¿½Í¤ï¿½ï¿½ï¿½(L = ï¿½ï¿½ï¿½ï¿½, R = ï¿½ï¿½ï¿½, C = ï¿½ï¿½è§¡ï¿½Ò§, T = ï¿½ï¿½, B = ï¿½ï¿½Ò§),
+     *                    $fill = ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½Õ¢Í§Cell(false = ï¿½ï¿½ï¿½ï¿½Ê´ï¿½, true = ï¿½Ê´ï¿½),
+     *                    $link = URL ï¿½ï¿½ï¿½ï¿½Í§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â§ä»¶Ö§
+     *                )
+     *****************************************************************************************/
+    function Cell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = false, $link = '') {
+        $this->checkFill = "";
+        $k               = $this->k;
+        if ($this->y + $h > $this->PageBreakTrigger && !$this->InHeader && !$this->InFooter && $this->AcceptPageBreak()) {
+            //ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½Ñµ
+            $x  = $this->x;
+            $ws = $this->ws;
+            if ($ws > 0) {
+                $this->ws = 0;
+                $this->_out('0 Tw');
+            }
+            $this->AddPage($this->CurOrientation);
+            $this->x = $x;
+            if ($ws > 0) {
+                $this->ws = $ws;
+                $this->_out(sprintf('%.3F Tw', $ws * $k));
+            }
+        }
+        //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¡ÑºË¹ï¿½Ò¡ï¿½Ð´ï¿½ï¿½
+        if ($w == 0)
+            $w = $this->w - $this->rMargin - $this->x;
+        $this->s_th = '';
+        //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íº 4 ï¿½ï¿½Ò¹ ï¿½ï¿½ï¿½ï¿½Õ¡ï¿½Íº
+        if ($fill || $border == 1) {
+            if ($fill)
+                $op = ($border == 1) ? 'B' : 'f';
+            else
+                $op = 'S';
+            $this->s_th = sprintf('%.2F %.2F %.2F %.2F re %s ', $this->x * $k, ($this->h - $this->y) * $k, $w * $k, -$h * $k, $op);
+            if ($op == 'f')
+                $this->checkFill = $op;
+        }
+        //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (is_string($border)) {
+            $x = $this->x;
+            $y = $this->y;
+            if (strpos($border, 'L') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', $x * $k, ($this->h - $y) * $k, $x * $k, ($this->h - ($y + $h)) * $k);
+            if (strpos($border, 'T') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', $x * $k, ($this->h - $y) * $k, ($x + $w) * $k, ($this->h - $y) * $k);
+            if (strpos($border, 'R') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', ($x + $w) * $k, ($this->h - $y) * $k, ($x + $w) * $k, ($this->h - ($y + $h)) * $k);
+            if (strpos($border, 'B') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', $x * $k, ($this->h - ($y + $h)) * $k, ($x + $w) * $k, ($this->h - ($y + $h)) * $k);
+        }
 
-	//µÇ¨ÊÍº¡ÒÃáÊ´§¼Å¢Í§µÑÇÍÑ¡ÉÃÊÃÐº¹
-	elseif($this->_errorTh($this->array_th[$i])==2)
-	{
-		//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃµÑÇ¡èÍ¹Ë¹éÒ¹Ñé¹à»ç¹µÑÇÍÑ¡ÉÃËÒ§ÂÒÇº¹
-		if($this->_errorTh($this->array_th[$i-1])==3)	
-		{
-			$pointX=$this->pointX-.17*$this->GetStringWidth($this->array_th[$i-1])*$this->k;
-			$this->txt_error=1;
-		}
-		//¶éÒµÑÇ¹Ñé¹à»ç¹ÊÃÐÍÓ
-		if($this->array_th[$i]=="Ó")
-			//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃµÑÇ¡èÍ¹Ë¹éÒ¹Ñé¹à»ç¹µÑÇÍÑ¡ÉÃËÒ§ÂÒÇº¹
-			if($this->_errorTh($this->array_th[$i-2])==3)	
-			{
-				$pointX=$this->pointX-.17*$this->GetStringWidth($this->array_th[$i-2])*$this->k;
-				$this->txt_error=1;
-			}
-	}																						
-	//¨º¡ÒÃµÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃÊÃÐº¹
+        if ($txt !== '') {
+            $x = $this->x;
+            $y = $this->y;
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ã¨Ñ´ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´Ñº
+            if (strpos($align, 'R') !== false)
+                $dx = $w - $this->cMargin - $this->GetStringWidth($txt);
+            else if (strpos($align, 'C') !== false)
+                $dx = ($w - $this->GetStringWidth($txt)) / 2;
+            else
+                $dx = $this->cMargin;
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ã¨Ñ´ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ï¿½
+            if (strpos($align, 'T') !== false)
+                $dy = $h - (.7 * $this->k * $this->FontSize);
+            else if (strpos($align, 'B') !== false)
+                $dy = $h - (.3 * $this->k * $this->FontSize);
+            else
+                $dy = .5 * $h;
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ã¢Õ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½
+            if ($this->underline) {
+                //ï¿½ï¿½Ë¹ï¿½ï¿½Ñ¹ï¿½Ö¡ï¿½ï¿½Ò¿Ô¡
+                if ($this->ColorFlag)
+                    $this->s_th .= ' q ' . $this->TextColor . ' ';
+                //ï¿½Õ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½0
+                $this->s_th .= ' ' . $this->_dounderline($this->x + $dx, $this->y + .5 * $h + .3 * $this->FontSize, $txt);
+                //ï¿½ï¿½Ë¹ï¿½ï¿½×¹ï¿½ï¿½Ò¡ï¿½Ò¿Ô¡
+                if ($this->ColorFlag)
+                    $this->s_th .= ' Q ';
+            }
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â§ä»¶Ö§
+            if ($link)
+                $this->Link($this->x, $this->y, $this->GetStringWidth($txt), $this->FontSize, $link);
+            /*if($s)
+                $this->_out($s);
+            $s='';*/
+            //ï¿½Ñ´ï¿½Ñ¡ï¿½ï¿½ï¿½Í¡ï¿½Ò¡ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½Å§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            $this->array_th  = substr($txt, 0);
+            $i               = 0;
+            $this->pointY    = ($this->h - ($y + $dy + .3 * $this->FontSize)) * $k;
+            $this->curPointX = ($x + $dx) * $k;
+            $this->string_th = '';
+            $this->txt_error = 0;
 
-	//µÇ¨ÊÍº¡ÒÃáÊ´§¼Å¢Í§µÑÇÍÑ¡ÉÃÊÃÐÅèÒ§
-	elseif($this->_errorTh($this->array_th[$i])==6)
-	{
-		//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃµÑÇ¡èÍ¹Ë¹éÒ¹Ñé¹à»ç¹µÑÇÍÑ¡ÉÃ ­. ¡Ñº °.
-		if($this->_errorTh($this->array_th[$i-1])==5)						
-		{	//$this->string_th		$this->curPointX
-			$this->TText($this->curPointX,$this->pointY,$this->string_th);
-			$this->string_th='';
-			$this->curPointX=$this->pointX;
+            while ($i < strlen($txt)) {
+                //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½Ë¹è§·ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                if (strpos('ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', $this->array_th[$i]) !== false) {
+                    $pX = $x + $dx;
+                    if ($i > 0)
+                        $pX += .02 * $this->GetStringWidth($this->array_th[$i - 1]);
+                    $this->pointX = $pX * $k;
+                    //ï¿½ï¿½Ç¨ï¿½Íºï¿½Ñ¡ï¿½ï¿½ ï¿½ï¿½Ñºï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ð·Ó¡ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½
+                    $this->_checkT($i);
 
-			if($this->checkFill=='f')
-				$this->s_th.=' q ';
-			else
-				$this->s_th.=' q 1 g ';
-			//ÊÃéÒ§ÊÕèàËÅÕèÂÁä»»Ô´·Õè°Ò¹ÅèÒ§¢Í§µÑÇÍÑ¡ÉÃ ­. ¡Ñº °. $s.
-			$this->s_th.=sprintf('%.2F %.2F %.2F %.2F re f ',$this->pointX-$this->GetStringWidth($this->array_th[$i-1])*$this->k,$this->pointY-.27*$this->FontSize*$this->k,.9*$this->GetStringWidth($this->array_th[$i-1])*$this->k,.25*$this->FontSize*$this->k);
-			$this->s_th.=' Q ';
+                    if ($this->txt_error == 0)
+                        $this->string_th .= $this->array_th[$i];
+                    else {
+                        $this->txt_error = 0;
+                    }
+                } else
+                    $this->string_th .= $this->array_th[$i];
 
-			$this->txt_error=1;
-		}
-		//µÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃµÑÇ¡èÍ¹Ë¹éÒ¹Ñé¹à»ç¹ÍÑ¡¢ÃÐ ¯. ¡Ñº ®.
-		elseif($this->_errorTh($this->array_th[$i-1])==4)							
-		{
-			$pointY=$this->pointY-.25*$this->FontSize*$this->k;
-			$this->txt_error=1;
-		}
-		//¨º¡ÒÃµÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃÊÃÐÅèÒ§
-	}																						
-	//¨º¡ÒÃµÃÇ¨ÊÍºµÑÇÍÑ¡ÉÃÐÊÃÐÅèÒ§
-		
-	if($this->txt_error==1)
-		$this->TText($pointX,$pointY,$this->array_th[$i]);
-}
+                //ï¿½ï¿½ï¿½ï¿½Í¹ï¿½ï¿½ï¿½Ë¹ï¿½ x ä»·ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
+                $x = $x + $this->GetStringWidth($this->array_th[$i]);
+                $i++;
+            }
+            $this->TText($this->curPointX, $this->pointY, $this->string_th);
+            /*$this->s_th.=$this->s_hidden.$this->s_error;*/
+            //$this->s_th.=$this->s_error;
+            if ($this->s_th)
+                $this->_out($this->s_th);
+        } else
+            //ï¿½Ó¤ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¢ï¿½Í¤ï¿½ï¿½ï¿½
+            $this->_out($this->s_th);
 
-/********************************************************************************
-* ãªé§Ò¹: Function	_checkT ¢Í§ Class FPDF_TH				
-* ¡ÒÃ·Ó§Ò¹: ãªéã¹¡ÒÃµÃÇ¨ÊÍºÍÑ¡ÉÃ·ÕèÍÒ¨¨Ð·ÓãËéà¡Ô´¡ÒÃ¾ÔÁ¾ì·Õè¼Ô´¾ÅÒ´			
-* ¤ÇÒÁµéÍ§¡ÒÃ: $char_th = µÑÇÍÑ¡ÉÃ·Õè¨Ðãªéã¹¡ÒÃà»ÃÕÂºà·ÕÂº			
-*********************************************************************************/
-function _errorTh($char_th)
-{	
-	$txt_error=0;
-	//µÑÇÍÑ¡ÉÃº¹-º¹
-	if(($char_th=='è')||($char_th=='é')||($char_th=='ê')||($char_th=='ë')||($char_th=='ì'))
-		$txt_error=1;
-	//µÑÇÍÑ¡ÉÃº¹
-	elseif(($char_th=='Ô')||($char_th=='Õ')||($char_th=='Ö')||($char_th=='×')||($char_th=='ç')||($char_th=='Ñ')||($char_th=='Ó'))
-		$txt_error=2;
-	//µÑÇÍÑ¡ÉÃ¡ÅÒ§-º¹
-	elseif(($char_th=='»')||($char_th=='¿')||($char_th=='½'))
-		$txt_error=3;
-	//µÑÇÍÑ¡ÉÃ¡ÅÒ§-ÅèÒ§
-	elseif(($char_th=='®')||($char_th=='¯'))
-		$txt_error=4;
-	//µÑÇÍÑ¡ÉÃ¡ÅÒ§-ÅèÒ§
-	elseif(($char_th=='­')||($char_th=='°'))
-		$txt_error=5;
-	//µÑÇÍÑ¡ÉÃÊÃÐÅèÒ§
-	elseif(($char_th=='Ø')||($char_th=='Ù'))
-		$txt_error=6;
-	else
-		$txt_error=0;
-	return $txt_error;
-}
+        $this->lasth = $h;
+        //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ò§ï¿½ï¿½ï¿½Ë¹è§¢Í§ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
+        if ($ln > 0) {
+            //ï¿½ï¿½é¹ºï¿½Ã·Ñ´ï¿½ï¿½ï¿½ï¿½
+            $this->y += $h;
+            if ($ln == 1)
+                $this->x = $this->lMargin;
+        } else
+            $this->x += $w;
+    }
 
-/********************************************************************************
-* ãªé§Ò¹: Function	_checkT ¢Í§ Class FPDF_TH									*
-* ¡ÒÃ·Ó§Ò¹: ãªéã¹¾ÔÁ¾ìµÑÇÍÑ¡ÉÃ·ÕèµÃÇ¨ÊÍºáÅéÇ									*
-* ¤ÇÒÁµéÍ§¡ÒÃ: $txt_th = µÑÇÍÑ¡ÉÃ 1 µÑÇ ·ÕèµÃÇ¨ÊÍºáÅéÇ							*
-*						$s = ÊÒÂÍÑ¡¢ÃÐ¢Í§â¤´ PDF								*
-*********************************************************************************/
-function TText($pX, $pY, $txt_th)
-{	
-	//µÇ¨ÊÍº¡ÒÃãÊèÊÕà«ÅÅì
-	if($this->ColorFlag)
-		$this->s_th.=' q '.$this->TextColor.' ';
-	$txt_th2=str_replace(')','\\)',str_replace('(','\\(',str_replace('\\','\\\\',$txt_th)));
-	//ÃÐºØµÓáË¹è§ áÅÐ¾ÔÁ¾ìµÑÇÍÑ¡ÉÃ
-	$this->s_th.=sprintf(' BT %.2F %.2F Td (%s) Tj ET ',$pX,$pY,$txt_th2);
-	if($this->ColorFlag)
-		$this->s_th.=' Q ';
-}
+    /****************************************************************************************
+     * ï¿½ï¿½Ò¹: called by function MultiCell within this class
+     * ï¿½ï¿½Ò§ï¿½Ô§: Function Cell    ï¿½Í§ Class FPDF
+     * ï¿½ï¿½Ã·Ó§Ò¹: ï¿½ï¿½ã¹¡ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½Ã·Ñ´ï¿½Í§ï¿½Í¡ï¿½ï¿½ï¿½ PDF
+     * ï¿½Ùºáºº: MCell (    $w = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§ï¿½Í§Cell,
+     *                    $h = ï¿½ï¿½ï¿½ï¿½ï¿½Ù§ï¿½Í§Cell,
+     *                    $txt = ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½,
+     *                    $border = ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íº(0 = ï¿½ï¿½ï¿½ï¿½Ê´ï¿½, 1= ï¿½Ê´ï¿½),
+     *                    $ln = ï¿½ï¿½ï¿½Ë¹è§·ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ´ä»¨Ò¡ï¿½ï¿½ï¿½ï¿½(0 = ï¿½ï¿½ï¿½, 1 = ï¿½ï¿½Ã·Ñ´ï¿½Ñ´ï¿½, 2 = ï¿½ï¿½Ò¹ï¿½ï¿½Ò§),
+     *                    $align = ï¿½ï¿½ï¿½Ë¹è§¢ï¿½Í¤ï¿½ï¿½ï¿½(L = ï¿½ï¿½ï¿½ï¿½, R = ï¿½ï¿½ï¿½, C = ï¿½ï¿½è§¡ï¿½Ò§, T = ï¿½ï¿½, B = ï¿½ï¿½Ò§),
+     *                    $fill = ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½Õ¢Í§Cell(false = ï¿½ï¿½ï¿½ï¿½Ê´ï¿½, true = ï¿½Ê´ï¿½)
+     *                    $link = URL ï¿½ï¿½ï¿½ï¿½Í§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â§ä»¶Ö§
+     *                )
+     *****************************************************************************************/
+    function MCell($w, $h = 0, $txt = '', $border = 0, $ln = 0, $align = '', $fill = false, $link = '') {
+        $this->checkFill = "";
+        $k               = $this->k;
+        if ($this->y + $h > $this->PageBreakTrigger && !$this->InHeader && !$this->InFooter && $this->AcceptPageBreak()) {
+            //ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½Ñµ
+            $x  = $this->x;
+            $ws = $this->ws;
+            if ($ws > 0) {
+                $this->ws = 0;
+                $this->_out('0 Tw');
+            }
+            $this->AddPage($this->CurOrientation);
+            $this->x = $x;
+            if ($ws > 0) {
+                $this->ws = $ws;
+                $this->_out(sprintf('%.3F Tw', $ws * $k));
+            }
+        }
+        //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¡ÑºË¹ï¿½Ò¡ï¿½Ð´ï¿½ï¿½
+        if ($w == 0)
+            $w = $this->w - $this->rMargin - $this->x;
+        $this->s_th = '';
+        //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íº 4 ï¿½ï¿½Ò¹ ï¿½ï¿½ï¿½ï¿½Õ¡ï¿½Íº
+        if ($fill || $border == 1) {
+            if ($fill)
+                $op = ($border == 1) ? 'B' : 'f';
+            else
+                $op = 'S';
+            $this->s_th = sprintf('%.2F %.2F %.2F %.2F re %s ', $this->x * $k, ($this->h - $this->y) * $k, $w * $k, -$h * $k, $op);
+            if ($op == 'f')
+                $this->checkFill = $op;
+        }
+        //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if (is_string($border)) {
+            $x = $this->x;
+            $y = $this->y;
+            if (strpos($border, 'L') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', $x * $k, ($this->h - $y) * $k, $x * $k, ($this->h - ($y + $h)) * $k);
+            if (strpos($border, 'T') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', $x * $k, ($this->h - $y) * $k, ($x + $w) * $k, ($this->h - $y) * $k);
+            if (strpos($border, 'R') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', ($x + $w) * $k, ($this->h - $y) * $k, ($x + $w) * $k, ($this->h - ($y + $h)) * $k);
+            if (strpos($border, 'B') !== false)
+                $this->s_th .= sprintf('%.2F %.2F m %.2F %.2F l S ', $x * $k, ($this->h - ($y + $h)) * $k, ($x + $w) * $k, ($this->h - ($y + $h)) * $k);
+        }
 
-/****************************************************************************************
-* ãªé§Ò¹: called by function MultiCell within this class								
-* ÍéÒ§ÍÔ§: Function Cell	¢Í§ Class FPDF												
-* ¡ÒÃ·Ó§Ò¹: ãªéã¹¡ÒÃ¾ÔÁ¾ì¢éÍ¤ÇÒÁ·ÕÅÐºÃÃ·Ñ´¢Í§àÍ¡ÊÒÃ PDF 											
-* ÃÙºáºº: MCell (	$w = ¤ÇÒÁ¡ÇéÒ§¢Í§Cell,													
-*					$h = ¤ÇÒÁÊÙ§¢Í§Cell,													
-*					$txt = ¢éÍ¤ÇÒÁ·Õè¨Ð¾ÔÁ¾ì,													
-*					$border = ¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº(0 = äÁèáÊ´§, 1= áÊ´§),					
-*					$ln = µÓáË¹è§·ÕèÍÂÙè¶Ñ´ä»¨Ò¡à«ÅÅì(0 = ¢ÇÒ, 1 = ºÃÃ·Ñ´¶Ñ´ä», 2 = ´éÒ¹ÅèÒ§),
-*					$align = µÓáË¹è§¢éÍ¤ÇÒÁ(L = «éÒÂ, R = ¢ÇÒ, C = ¡Öè§¡ÅÒ§, T = º¹, B = ÅèÒ§),	
-*					$fill = ¡ÓË¹´¡ÒÃáÊ´§ÊÕ¢Í§Cell(false = äÁèáÊ´§, true = áÊ´§)			
-*					$link = URL ·ÕèµéÍ§¡ÒÃãËé¢éÍ¤ÇÒÁàª×èÍÁâÂ§ä»¶Ö§		
-*				)
-*****************************************************************************************/
-function MCell($w, $h=0, $txt='', $border=0, $ln=0, $align='', $fill=false, $link='')
-{
-	$this->checkFill="";
-	$k=$this->k;
-	if($this->y+$h>$this->PageBreakTrigger && !$this->InHeader && !$this->InFooter && $this->AcceptPageBreak())
-	{
-		//¢Öé¹Ë¹éÒãËÁèÍÑµâ¹ÁÑµ
-		$x=$this->x;
-		$ws=$this->ws;
-		if($ws>0)
-		{
-			$this->ws=0;
-			$this->_out('0 Tw');
-		}
-		$this->AddPage($this->CurOrientation);
-		$this->x=$x;
-		if($ws>0)
-		{
-			$this->ws=$ws;
-			$this->_out(sprintf('%.3F Tw',$ws*$k));
-		}
-	}
-	//¡ÓË¹´¤ÇÒÁ¡ÇéÒ§à«ÅÅìà·èÒ¡ÑºË¹éÒ¡ÃÐ´ÒÉ
-	if($w==0)
-		$w=$this->w-$this->rMargin-$this->x;
-	$this->s_th='';
-	//¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº 4 ´éÒ¹ áÅÐÊÕ¡ÃÍº
-	if($fill || $border==1)
-	{
-		if($fill)
-			$op=($border==1) ? 'B' : 'f';
-		else
-			$op='S';
-		$this->s_th=sprintf('%.2F %.2F %.2F %.2F re %s ',$this->x*$k,($this->h-$this->y)*$k,$w*$k,-$h*$k,$op);
-		if($op=='f')
-			$this->checkFill=$op;
-	}
-	//¡ÓË¹´¡ÒÃáÊ´§àÊé¹¡ÃÍº·ÕÅÐàÊé¹
-	if(is_string($border))
-	{
-		$x=$this->x;
-		$y=$this->y;
-		if(strpos($border,'L')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-$y)*$k,$x*$k,($this->h-($y+$h))*$k);
-		if(strpos($border,'T')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-$y)*$k,($x+$w)*$k,($this->h-$y)*$k);
-		if(strpos($border,'R')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',($x+$w)*$k,($this->h-$y)*$k,($x+$w)*$k,($this->h-($y+$h))*$k);
-		if(strpos($border,'B')!==false)
-			$this->s_th.=sprintf('%.2F %.2F m %.2F %.2F l S ',$x*$k,($this->h-($y+$h))*$k,($x+$w)*$k,($this->h-($y+$h))*$k);
-	}
+        if ($txt !== '') {
+            $x = $this->x;
+            $y = $this->y;
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ã¨Ñ´ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð´Ñº
+            if (strpos($align, 'R') !== false)
+                $dx = $w - $this->cMargin - $this->GetStringWidth($txt);
+            else if (strpos($align, 'C') !== false)
+                $dx = ($w - $this->GetStringWidth($txt)) / 2;
+            else
+                $dx = $this->cMargin;
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ã¨Ñ´ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ç´ï¿½ï¿½
+            if (strpos($align, 'T') !== false)
+                $dy = $h - (.7 * $this->k * $this->FontSize);
+            else if (strpos($align, 'B') !== false)
+                $dy = $h - (.3 * $this->k * $this->FontSize);
+            else
+                $dy = .5 * $h;
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ã¢Õ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½
+            if ($this->underline) {
+                //ï¿½ï¿½Ë¹ï¿½ï¿½Ñ¹ï¿½Ö¡ï¿½ï¿½Ò¿Ô¡
+                if ($this->ColorFlag)
+                    $this->s_th .= 'q ' . $this->TextColor . ' ';
+                //ï¿½Õ´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½0
+                $this->s_th .= ' ' . $this->_dounderline($this->x + $dx, $this->y + .5 * $h + .3 * $this->FontSize, $txt);
+                //ï¿½ï¿½Ë¹ï¿½ï¿½×¹ï¿½ï¿½Ò¡ï¿½Ò¿Ô¡
+                if ($this->ColorFlag)
+                    $this->s_th .= ' Q';
+            }
+            //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Â§ä»¶Ö§
+            if ($link)
+                $this->Link($this->x, $this->y, $this->GetStringWidth($txt), $this->FontSize, $link);
+            if ($this->s_th)
+                $this->_out($this->s_th);
+            $this->s_th = '';
+            //ï¿½Ñ´ï¿½Ñ¡ï¿½ï¿½ï¿½Í¡ï¿½Ò¡ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ðµï¿½ï¿½ï¿½ï¿½Å§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            $this->array_th = substr($txt, 0);
+            $i              = 0;
 
+            while ($i < strlen($txt)) {
+                //ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½Ë¹è§·ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                $this->pointX = ($x + $dx + .02 * $this->GetStringWidth($this->array_th[$i - 1])) * $k;
+                $this->pointY = ($this->h - ($y + $dy + .3 * $this->FontSize)) * $k;
+                //ï¿½ï¿½Ç¨ï¿½Íºï¿½Ñ¡ï¿½ï¿½ ï¿½ï¿½Ñºï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½Ð·Ó¡ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½
+                $this->_checkT($i);
+                if ($this->txt_error == 0)
+                    $this->TText($this->pointX, $this->pointY, $this->array_th[$i]);
+                else {
+                    $this->txt_error = 0;
+                }
+                //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¢Ë¹ï¿½ï¿½
+                if ($this->array_th[$i] == '{' && $this->array_th[$i + 1] == 'n' && $this->array_th[$i + 2] == 'b' && $this->array_th[$i + 3] == '}')
+                    $i = $i + 3;
+                //ï¿½ï¿½ï¿½ï¿½Í¹ï¿½ï¿½ï¿½Ë¹ï¿½ x ä»·ï¿½ï¿½ï¿½Ç·ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
+                $x = $x + $this->GetStringWidth($this->array_th[$i]);
+                $i++;
+            }
+            $this->_out($this->s_th);
+        } else
+            //ï¿½Ó¤ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Õ¢ï¿½Í¤ï¿½ï¿½ï¿½
+            $this->_out($this->s_th);
 
-	if($txt!=='')
-	{			
-		$x=$this->x;
-		$y=$this->y;
-		//¡ÓË¹´¡ÒÃ¨Ñ´¢éÍ¤ÇÒÁã¹à«ÅÅìµÒÁá¹ÇÃÐ´Ñº
-		if(strpos($align,'R')!==false)
-			$dx=$w-$this->cMargin-$this->GetStringWidth($txt);
-		elseif(strpos($align,'C')!==false)
-			$dx=($w-$this->GetStringWidth($txt))/2;
-		else
-			$dx=$this->cMargin;
-		//¡ÓË¹´¡ÒÃ¨Ñ´¢éÍ¤ÇÒÁã¹à«ÅÅìµÒÁá¹Ç´Ôè§
-		if(strpos($align,'T')!==false)
-			$dy=$h-(.7*$this->k*$this->FontSize);
-		elseif(strpos($align,'B')!==false)
-			$dy=$h-(.3*$this->k*$this->FontSize);
-		else
-			$dy=.5*$h;
-		//¡ÓË¹´¡ÒÃ¢Õ´àÊé¹ãµé¢éÍ¤ÇÒÁ
-		if($this->underline)
-		{	
-			//¡ÓË¹´ºÑ¹·Ö¡¡ÃÒ¿Ô¡
-			if($this->ColorFlag)
-				$this->s_th.='q '.$this->TextColor.' ';
-			//¢Õ´àÊé¹ãµé¢éÍ¤ÇÒÁ0
-			$this->s_th.=' '.$this->_dounderline($this->x+$dx,$this->y+.5*$h+.3*$this->FontSize,$txt);
-			//¡ÓË¹´¤×¹¤èÒ¡ÃÒ¿Ô¡
-			if($this->ColorFlag)
-				$this->s_th.=' Q';
-		}
-		//¡ÓË¹´¢éÍ¤ÇÒÁàª×èÍÁâÂ§ä»¶Ö§
-		if($link)
-			$this->Link($this->x,$this->y,$this->GetStringWidth($txt),$this->FontSize,$link);
-		if($this->s_th)
-			$this->_out($this->s_th);
-		$this->s_th='';
-		//µÑ´ÍÑ¡ÉÃÍÍ¡¨Ò¡¢éÍ¤ÇÒÁ ·ÕÅÐµÑÇà¡çºÅ§ÍÐàÃÂì
-		$this->array_th=substr($txt,0);
-		$i=0;
+        $this->lasth = $h;
+        //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ò§ï¿½ï¿½ï¿½Ë¹è§¢Í§ï¿½ï¿½ï¿½ï¿½Ñ´ï¿½
+        if ($ln > 0) {
+            //ï¿½ï¿½é¹ºï¿½Ã·Ñ´ï¿½ï¿½ï¿½ï¿½
+            $this->y += $h;
+            if ($ln == 1)
+                $this->x = $this->lMargin;
+        } else
+            $this->x += $w;
+    }
 
-		while($i<strlen($txt))
-		{	
-			//¡ÓË¹´µÓáË¹è§·Õè¨Ð¾ÔÁ¾ìÍÑ¡ÉÃã¹à«ÅÅì
-			$this->pointX=($x+$dx+.02*$this->GetStringWidth($this->array_th[$i-1]))*$k;
-			$this->pointY=($this->h-($y+$dy+.3*$this->FontSize))*$k;
-			//µÃÇ¨ÊÍºÍÑ¡ÉÃ »ÃÑºµÓáË¹è§áÅÐ·Ó¡ÒÃ¾ÔÁ¾ì
-			$this->_checkT($i);
-			if($this->txt_error==0)
-				$this->TText($this->pointX,$this->pointY,$this->array_th[$i]);
-			else
-			{
-				$this->txt_error=0;
-			}
-			//µÃÇ¨ÊÍº¡ÒÃãÊèàÅ¢Ë¹éÒ
-			if($this->array_th[$i]=='{'&&$this->array_th[$i+1]=='n'&&$this->array_th[$i+2]=='b'&&$this->array_th[$i+3]=='}')
-				$i=$i+3;
-			//àÅ×èÍ¹µÓáË¹è§ x ä»·ÕèµÑÇ·Õè¨Ð¾ÔÁ¾ì¶Ñ´ä»
-			$x=$x+$this->GetStringWidth($this->array_th[$i]);
-			$i++;
-		}
-		$this->_out($this->s_th);
-	}
-	else
-		//¹Ó¤èÒä»áÊ´§àÁ×èÍäÁèÁÕ¢éÍ¤ÇÒÁ
-		$this->_out($this->s_th);
+    /****************************************************************************************
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½: Function ï¿½Í§ Class FPDF_TH
+     * ï¿½ï¿½Ò§ï¿½Ô§: Function MultiCell ï¿½Í§ Class FPDF
+     * ï¿½ï¿½Ã·Ó§Ò¹: ï¿½ï¿½ã¹¡ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Âºï¿½Ã·Ñ´ï¿½Í§ï¿½Í¡ï¿½ï¿½ï¿½ PDF
+     * ï¿½Ùºáºº: MultiCell (    $w = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§ï¿½Í§Cell,
+     *                        $h = ï¿½ï¿½ï¿½ï¿½ï¿½Ù§ï¿½Í§Cell,
+     *                        $txt = ï¿½ï¿½Í¤ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½,
+     *                        $border = ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½ï¿½é¹¡ï¿½Íº(0 = ï¿½ï¿½ï¿½ï¿½Ê´ï¿½, 1= ï¿½Ê´ï¿½)    ,
+     *                        $align = ï¿½ï¿½ï¿½Ë¹è§¢ï¿½Í¤ï¿½ï¿½ï¿½(L = ï¿½ï¿½ï¿½ï¿½, R = ï¿½ï¿½ï¿½, C = ï¿½ï¿½è§¡ï¿½Ò§, J = ï¿½ï¿½Ð¨ï¿½ï¿½),
+     *                        $fill = ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½Õ¢Í§Cell(false = ï¿½ï¿½ï¿½ï¿½Ê´ï¿½, true = ï¿½Ê´ï¿½)
+     *                    )
+     *****************************************************************************************/
+    function MultiCell($w, $h, $txt, $border = 0, $align = 'J', $fill = false) {
+        //Output text with automatic or explicit line breaks
+        $cw =& $this->CurrentFont['cw'];
+        if ($w == 0)
+            $w = $this->w - $this->rMargin - $this->x;
+        $wmax = ($w - 2 * $this->cMargin) * 1000 / $this->FontSize;
+        $s    = str_replace("\r", '', $txt);
+        $nb   = strlen($s);
+        if ($nb > 0 && $s[$nb - 1] == "\n")
+            $nb--;
+        $b = 0;
+        if ($border) {
+            if ($border == 1) {
+                $border = 'LTRB';
+                $b      = 'LRT';
+                $b2     = 'LR';
+            } else {
+                $b2 = '';
+                if (strpos($border, 'L') !== false)
+                    $b2 .= 'L';
+                if (strpos($border, 'R') !== false)
+                    $b2 .= 'R';
+                $b = (strpos($border, 'T') !== false) ? $b2 . 'T' : $b2;
+            }
+        }
+        $sep = -1;
+        $i   = 0;
+        $j   = 0;
+        $l   = 0;
+        $ns  = 0;
+        $nl  = 1;
+        while ($i < $nb) {
+            //Get next character
+            $c = $s{$i};
+            if ($c == "\n") {
+                //Explicit line break
+                if ($this->ws > 0) {
+                    $this->ws = 0;
+                    $this->_out('0 Tw');
+                }
+                $this->MCell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill);
+                $i++;
+                $sep = -1;
+                $j   = $i;
+                $l   = 0;
+                $ns  = 0;
+                $nl++;
+                if ($border && $nl == 2)
+                    $b = $b2;
+                continue;
+            }
+            if ($c == ' ') {
+                $sep = $i;
+                $ls  = $l;
+                $ns++;
+            }
+            $l += $cw[$c];
+            if ($l > $wmax) {
+                //Automatic line break
+                if ($sep == -1) {
+                    if ($i == $j)
+                        $i++;
+                    if ($this->ws > 0) {
+                        $this->ws = 0;
+                        $this->_out('0 Tw');
+                    }
+                    $this->MCell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill);
+                } else {
+                    if ($align == 'J') {
+                        $this->ws = ($ns > 1) ? ($wmax - $ls) / 1000 * $this->FontSize / ($ns - 1) : 0;
+                        $this->_out(sprintf('%.3F Tw', $this->ws * $this->k));
+                    }
+                    $this->MCell($w, $h, substr($s, $j, $sep - $j), $b, 2, $align, $fill);
+                    $i = $sep + 1;
+                }
+                $sep = -1;
+                $j   = $i;
+                $l   = 0;
+                $ns  = 0;
+                $nl++;
+                if ($border && $nl == 2)
+                    $b = $b2;
+            } else
+                $i++;
+        }
+        //Last chunk
+        if ($this->ws > 0) {
+            $this->ws = 0;
+            $this->_out('0 Tw');
+        }
+        if ($border && strpos($border, 'B') !== false)
+            $b .= 'B';
+        $this->MCell($w, $h, substr($s, $j, $i - $j), $b, 2, $align, $fill);
+        $this->x = $this->lMargin;
+    }
 
-	$this->lasth=$h;
-	//µÃÇ¨ÊÍº¡ÒÃÇÒ§µÓáË¹è§¢Í§à«ÅÅì¶Ñ´ä»
-	if($ln>0)
-	{
-		//¢Öé¹ºÃÃ·Ñ´ãËÁè
-		$this->y+=$h;
-		if($ln==1)
-			$this->x=$this->lMargin;
-	}
-	else
-		$this->x+=$w;
-}
+    /********************************************************************************
+     * ï¿½ï¿½Ò¹: Function    _checkT ï¿½Í§ Class FPDF_TH                                    *
+     * ï¿½ï¿½Ã·Ó§Ò¹: ï¿½ï¿½ã¹¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã·ï¿½ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½                                    *
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í§ï¿½ï¿½ï¿½: $txt_th = ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ 1 ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½                            *
+     *                        $s = ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ð¢Í§â¤´ PDF                                *
+     *********************************************************************************/
+    function TText($pX, $pY, $txt_th) {
+        //ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+        if ($this->ColorFlag)
+            $this->s_th .= ' q ' . $this->TextColor . ' ';
+        $txt_th2 = str_replace(')', '\\)', str_replace('(', '\\(', str_replace('\\', '\\\\', $txt_th)));
+        //ï¿½ÐºØµï¿½ï¿½Ë¹ï¿½ ï¿½ï¿½Ð¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½
+        $this->s_th .= sprintf(' BT %.2F %.2F Td (%s) Tj ET ', $pX, $pY, $txt_th2);
+        if ($this->ColorFlag)
+            $this->s_th .= ' Q ';
+    }
+
+    /********************************************************************************
+     * ï¿½ï¿½Ò¹: Function    Cell ï¿½Í§ Class FPDF_TH
+     * ï¿½ï¿½Ã·Ó§Ò¹: ï¿½ï¿½ã¹¡ï¿½Ãµï¿½Ç¨ï¿½Íºï¿½Ñ¡ï¿½ï¿½ ï¿½ï¿½Ð»ï¿½Ñºï¿½ï¿½ï¿½Ë¹è§¡ï¿½Í¹ï¿½ï¿½ï¿½Ð·Ó¡ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í§ï¿½ï¿½ï¿½: $this->array_th = ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í§ï¿½Ñ¡ï¿½Ã·ï¿½ï¿½Ñ´ï¿½Í¡ï¿½Ò¡ï¿½ï¿½Í¤ï¿½ï¿½ï¿½
+     *                        $i = ï¿½Ó´Ñºï¿½Ñ¨ï¿½ØºÑ¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ð·Ó¡ï¿½Ãµï¿½Ç¨ï¿½Íº
+     *                        $s = ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½Ð¢Í§â¤´ PDF
+     *********************************************************************************/
+    function _checkT($i) {
+        $pointY = $this->pointY;
+        $pointX = $this->pointX;
+        $nb     = strlen($this->array_th);
+        //ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½Å¢Í§ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½Ðºï¿½
+        if ($this->_errorTh($this->array_th[$i]) == 1) {
+            //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðºï¿½ ï¿½ï¿½Ñºï¿½ï¿½ï¿½Ë¹ï¿½Å§
+            if (($this->_errorTh($this->array_th[$i - 1]) != 2) && ($this->array_th[$i + 1] != "ï¿½")) {
+                //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½
+                if ($this->array_th[$i] == "ï¿½" || $this->array_th[$i] == "ï¿½") {
+                    $pointY          = $this->pointY - .2 * $this->FontSize * $this->k;
+                    $this->txt_error = 1;
+                } //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                else if ($this->array_th[$i] == 'ï¿½' || $this->array_th[$i] == 'ï¿½') {
+                    $pointY          = $this->pointY - .23 * $this->FontSize * $this->k;
+                    $this->txt_error = 1;
+                } //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ç¹¡ï¿½ï¿½Ñ¹ï¿½ï¿½
+                else {
+                    $pointY          = $this->pointY - .17 * $this->FontSize * $this->k;
+                    $this->txt_error = 1;
+                }
+            }
+
+            //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãµï¿½Ç¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ç¹µï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ò§ï¿½ï¿½Çºï¿½
+            if ($this->_errorTh($this->array_th[$i - 1]) == 3) {
+                //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½
+                if ($this->array_th[$i] == "ï¿½" || $this->array_th[$i] == "ï¿½") {
+                    $pointX          = $this->pointX - .17 * $this->GetStringWidth($this->array_th[$i - 1]) * $this->k;
+                    $this->txt_error = 1;
+                } //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                else if ($this->array_th[$i] == 'ï¿½' || $this->array_th[$i] == 'ï¿½') {
+                    $pointX          = $this->pointX - .25 * $this->GetStringWidth($this->array_th[$i - 1]) * $this->k;
+                    $this->txt_error = 1;
+                } //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ç¹¡ï¿½ï¿½Ñ¹ï¿½ï¿½
+                else {
+                    $pointX          = $this->pointX - .4 * $this->GetStringWidth($this->array_th[$i - 1]) * $this->k;
+                    $this->txt_error = 1;
+                }
+            }
+
+            //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãµï¿½Ç¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ï¿½Õ¡ï¿½ç¹µï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ò§ï¿½ï¿½Çºï¿½
+            if ($i >= 2 && $this->_errorTh($this->array_th[$i - 2]) == 3) {
+                //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ñµï¿½ï¿½
+                if ($this->array_th[$i] == "ï¿½" || $this->array_th[$i] == "ï¿½") {
+                    $pointX          = $this->pointX - .17 * $this->GetStringWidth($this->array_th[$i - 2]) * $this->k;
+                    $this->txt_error = 1;
+                } //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+                else if ($this->array_th[$i] == 'ï¿½' || $this->array_th[$i] == 'ï¿½') {
+                    $pointX          = $this->pointX - .25 * $this->GetStringWidth($this->array_th[$i - 2]) * $this->k;
+                    $this->txt_error = 1;
+                } //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ç¹¡ï¿½ï¿½Ñ¹ï¿½ï¿½
+                else {
+                    $pointX          = $this->pointX - .4 * $this->GetStringWidth($this->array_th[$i - 2]) * $this->k;
+                    $this->txt_error = 1;
+                }
+            }
+        }
+        //ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ë¹ï¿½ï¿½ï¿½ï¿½Ðºï¿½
+
+        //ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½Å¢Í§ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ðºï¿½
+        else if ($this->_errorTh($this->array_th[$i]) == 2) {
+            //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãµï¿½Ç¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ç¹µï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ò§ï¿½ï¿½Çºï¿½
+            if ($this->_errorTh($this->array_th[$i - 1]) == 3) {
+                $pointX          = $this->pointX - .17 * $this->GetStringWidth($this->array_th[$i - 1]) * $this->k;
+                $this->txt_error = 1;
+            }
+            //ï¿½ï¿½Òµï¿½Ç¹ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+            if ($this->array_th[$i] == "ï¿½")
+                //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãµï¿½Ç¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ç¹µï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½Ò§ï¿½ï¿½Çºï¿½
+                if ($this->_errorTh($this->array_th[$i - 2]) == 3) {
+                    $pointX          = $this->pointX - .17 * $this->GetStringWidth($this->array_th[$i - 2]) * $this->k;
+                    $this->txt_error = 1;
+                }
+        }
+        //ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½Ðºï¿½
+
+        //ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ê´ï¿½ï¿½Å¢Í§ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§
+        else if ($this->_errorTh($this->array_th[$i]) == 6) {
+            //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãµï¿½Ç¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ç¹µï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ ï¿½. ï¿½Ñº ï¿½.
+            if ($this->_errorTh($this->array_th[$i - 1]) == 5) {    //$this->string_th		$this->curPointX
+                $this->TText($this->curPointX, $this->pointY, $this->string_th);
+                $this->string_th = '';
+                $this->curPointX = $this->pointX;
+
+                if ($this->checkFill == 'f')
+                    $this->s_th .= ' q ';
+                else
+                    $this->s_th .= ' q 1 g ';
+                //ï¿½ï¿½ï¿½Ò§ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ä»»Ô´ï¿½ï¿½ï¿½Ò¹ï¿½ï¿½Ò§ï¿½Í§ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ ï¿½. ï¿½Ñº ï¿½. $s.
+                $this->s_th .= sprintf('%.2F %.2F %.2F %.2F re f ', $this->pointX - $this->GetStringWidth($this->array_th[$i - 1]) * $this->k, $this->pointY - .27 * $this->FontSize * $this->k, .9 * $this->GetStringWidth($this->array_th[$i - 1]) * $this->k, .25 * $this->FontSize * $this->k);
+                $this->s_th .= ' Q ';
+
+                $this->txt_error = 1;
+            } //ï¿½ï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãµï¿½Ç¡ï¿½Í¹Ë¹ï¿½Ò¹ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ ï¿½. ï¿½Ñº ï¿½.
+            else if ($this->_errorTh($this->array_th[$i - 1]) == 4) {
+                $pointY          = $this->pointY - .25 * $this->FontSize * $this->k;
+                $this->txt_error = 1;
+            }
+            //ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§
+        }
+        //ï¿½ï¿½ï¿½ï¿½Ãµï¿½Ç¨ï¿½Íºï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§
+
+        if ($this->txt_error == 1)
+            $this->TText($pointX, $pointY, $this->array_th[$i]);
+    }
+
+    /********************************************************************************
+     * ï¿½ï¿½Ò¹: Function    _checkT ï¿½Í§ Class FPDF_TH
+     * ï¿½ï¿½Ã·Ó§Ò¹: ï¿½ï¿½ã¹¡ï¿½Ãµï¿½Ç¨ï¿½Íºï¿½Ñ¡ï¿½Ã·ï¿½ï¿½ï¿½Ò¨ï¿½Ð·ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½Ã¾ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ô´ï¿½ï¿½Ò´
+     * ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Í§ï¿½ï¿½ï¿½: $char_th = ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã·ï¿½ï¿½ï¿½ï¿½ï¿½ã¹¡ï¿½ï¿½ï¿½ï¿½ï¿½Âºï¿½ï¿½Âº
+     *********************************************************************************/
+    function _errorTh($char_th) {
+        $txt_error = 0;
+        //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãºï¿½-ï¿½ï¿½
+        if (($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½'))
+            $txt_error = 1;
+        //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ãºï¿½
+        else if (($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½'))
+            $txt_error = 2;
+        //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã¡ï¿½Ò§-ï¿½ï¿½
+        else if (($char_th == 'ï¿½') || ($char_th == 'ï¿½') || ($char_th == 'ï¿½'))
+            $txt_error = 3;
+        //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã¡ï¿½Ò§-ï¿½ï¿½Ò§
+        else if (($char_th == 'ï¿½') || ($char_th == 'ï¿½'))
+            $txt_error = 4;
+        //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½Ã¡ï¿½Ò§-ï¿½ï¿½Ò§
+        else if (($char_th == 'ï¿½') || ($char_th == 'ï¿½'))
+            $txt_error = 5;
+        //ï¿½ï¿½ï¿½ï¿½Ñ¡ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò§
+        else if (($char_th == 'ï¿½') || ($char_th == 'ï¿½'))
+            $txt_error = 6;
+        else
+            $txt_error = 0;
+        return $txt_error;
+    }
 //End of class
 }
 

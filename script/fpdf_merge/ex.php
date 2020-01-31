@@ -1,4 +1,5 @@
 <?php
+
 require('fpdf_merge.php');
 
 $merge = new FPDF_Merge();

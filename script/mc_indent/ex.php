@@ -1,38 +1,39 @@
 <?php
+
 require('mc_indent.php');
 
 $InterLigne = 7;
 
-$pdf=new PDF();
+$pdf = new PDF();
 $pdf->AddPage();
-$pdf->SetMargins(30,10,30);
-$pdf->SetFont('Arial','',12);
+$pdf->SetMargins(30, 10, 30);
+$pdf->SetFont('Arial', '', 12);
 
-$txt = "Cher Pierre";
+$txt    = "Cher Pierre";
 $txtLen = $pdf->GetStringWidth($txt);
-$milieu = (210-$txtLen)/2;
+$milieu = (210 - $txtLen) / 2;
 $pdf->SetX($milieu);
-$pdf->Write(5,$txt);
+$pdf->Write(5, $txt);
 
 $pdf->ln(30);
-$txt = "Voici venu le temps pour toi de renouveler ta licence-assurance, en effet celle-ci expire le 28/9 prochain. Tu trouveras joint à ce document le certificat d'aptitude à faire remplir par le médecin.";
-$pdf->MultiCell(0,$InterLigne,$txt,0,'J',0,15); 
+$txt = "Voici venu le temps pour toi de renouveler ta licence-assurance, en effet celle-ci expire le 28/9 prochain. Tu trouveras joint ï¿½ ce document le certificat d'aptitude ï¿½ faire remplir par le mï¿½decin.";
+$pdf->MultiCell(0, $InterLigne, $txt, 0, 'J', 0, 15);
 
 $pdf->ln(10);
-$txt = "Je me permets de te rappeler que cette licence est obligatoire et nécessaire à la pratique de notre sport favori, tant à l'occasion de nos entraînements qu'à toutes autres manifestations auxquelles tu peux participer telles que compétitions, cours fédéraux ou visites amicales dans un autre club.";
-$pdf->MultiCell(0,$InterLigne,$txt,0,'J',0,15); 
+$txt = "Je me permets de te rappeler que cette licence est obligatoire et nï¿½cessaire ï¿½ la pratique de notre sport favori, tant ï¿½ l'occasion de nos entraï¿½nements qu'ï¿½ toutes autres manifestations auxquelles tu peux participer telles que compï¿½titions, cours fï¿½dï¿½raux ou visites amicales dans un autre club.";
+$pdf->MultiCell(0, $InterLigne, $txt, 0, 'J', 0, 15);
 
 $pdf->ln(10);
-$txt = "Dès lors, je te saurais gré de bien vouloir me retourner le certificat d'aptitude dûment complété par le médecin accompagné de ton paiement de 31 € ou de la preuve de celui-ci par virement bancaire. Le tout dans les plus brefs délais afin de ne pas interrompre la couverture de ladite assurance et par la même occasion de t'empêcher de participer à nos cours le temps de la régularisation. Il y va de ta sécurité.";
-$pdf->MultiCell(0,$InterLigne,$txt,0,'J',0,15); 
+$txt = "Dï¿½s lors, je te saurais grï¿½ de bien vouloir me retourner le certificat d'aptitude dï¿½ment complï¿½tï¿½ par le mï¿½decin accompagnï¿½ de ton paiement de 31 ï¿½ ou de la preuve de celui-ci par virement bancaire. Le tout dans les plus brefs dï¿½lais afin de ne pas interrompre la couverture de ladite assurance et par la mï¿½me occasion de t'empï¿½cher de participer ï¿½ nos cours le temps de la rï¿½gularisation. Il y va de ta sï¿½curitï¿½.";
+$pdf->MultiCell(0, $InterLigne, $txt, 0, 'J', 0, 15);
 
 $pdf->ln(10);
-$txt = "Merci de la confiance que tu mets en notre club pour ton épanouissement sportif.";
-$pdf->MultiCell(0,$InterLigne,$txt,0,'J',0,15); 
+$txt = "Merci de la confiance que tu mets en notre club pour ton ï¿½panouissement sportif.";
+$pdf->MultiCell(0, $InterLigne, $txt, 0, 'J', 0, 15);
 
 $pdf->ln(10);
-$txt = "Le comité";
-$pdf->MultiCell(0,$InterLigne,$txt,0,'R',0); 
+$txt = "Le comitï¿½";
+$pdf->MultiCell(0, $InterLigne, $txt, 0, 'R', 0);
 
 $pdf->Output();
 ?>

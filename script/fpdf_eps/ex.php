@@ -1,7 +1,8 @@
 <?php
+
 require('fpdf_eps.php');
 
-$pdf=new PDF_EPS();
+$pdf = new PDF_EPS();
 
 // Page 1: AI
 $pdf->AddPage();

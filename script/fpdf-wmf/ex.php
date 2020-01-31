@@ -1,4 +1,5 @@
 <?php
+
 require('fpdf-wmf.php');
 
 $pdf = new FPDF_WMF();

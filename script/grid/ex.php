@@ -1,4 +1,5 @@
 <?php
+
 require('grid.php');
 
 $pdf = new PDF_Grid();

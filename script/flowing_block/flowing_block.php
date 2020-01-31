@@ -1,308 +1,271 @@
 <?php
+
 require('fpdf.php');
 
-class PDF_FlowingBlock extends FPDF
-{
+class PDF_FlowingBlock extends FPDF {
 
-	var $flowingBlockAttr;
+    var $flowingBlockAttr;
 
-	function saveFont()
-	{
+    function WriteFlowingBlock($s) {
 
-		$saved = array();
+        // width of all the content so far in points
+        $contentWidth =& $this->flowingBlockAttr['contentWidth'];
 
-		$saved[ 'family' ] = $this->FontFamily;
-		$saved[ 'style' ] = $this->FontStyle;
-		$saved[ 'sizePt' ] = $this->FontSizePt;
-		$saved[ 'size' ] = $this->FontSize;
-		$saved[ 'curr' ] =& $this->CurrentFont;
+        // cell width in points
+        $maxWidth =& $this->flowingBlockAttr['width'];
 
-		return $saved;
+        $lineCount =& $this->flowingBlockAttr['lineCount'];
 
-	}
+        // line height in user units
+        $lineHeight =& $this->flowingBlockAttr['height'];
 
-	function restoreFont( $saved )
-	{
+        $border =& $this->flowingBlockAttr['border'];
+        $align  =& $this->flowingBlockAttr['align'];
+        $fill   =& $this->flowingBlockAttr['fill'];
 
-		$this->FontFamily = $saved[ 'family' ];
-		$this->FontStyle = $saved[ 'style' ];
-		$this->FontSizePt = $saved[ 'sizePt' ];
-		$this->FontSize = $saved[ 'size' ];
-		$this->CurrentFont =& $saved[ 'curr' ];
+        $content =& $this->flowingBlockAttr['content'];
+        $font    =& $this->flowingBlockAttr['font'];
 
-		if( $this->page > 0)
-			$this->_out( sprintf( 'BT /F%d %.2F Tf ET', $this->CurrentFont[ 'i' ], $this->FontSizePt ) );
+        $font[]    = $this->saveFont();
+        $content[] = '';
 
-	}
+        $currContent =& $content[count($content) - 1];
 
-	function newFlowingBlock( $w, $h, $b = 0, $a = 'J', $f = 0 )
-	{
+        // where the line should be cutoff if it is to be justified
+        $cutoffWidth = $contentWidth;
 
-		// cell width in points
-		$this->flowingBlockAttr[ 'width' ] = $w * $this->k;
+        // for every character in the string
+        for ($i = 0; $i < strlen($s); $i++) {
 
-		// line height in user units
-		$this->flowingBlockAttr[ 'height' ] = $h;
+            // extract the current character
+            $c = $s[$i];
 
-		$this->flowingBlockAttr[ 'lineCount' ] = 0;
+            // get the width of the character in points
+            $cw = $this->CurrentFont['cw'][$c] * ($this->FontSizePt / 1000);
 
-		$this->flowingBlockAttr[ 'border' ] = $b;
-		$this->flowingBlockAttr[ 'align' ] = $a;
-		$this->flowingBlockAttr[ 'fill' ] = $f;
+            if ($c == ' ') {
 
-		$this->flowingBlockAttr[ 'font' ] = array();
-		$this->flowingBlockAttr[ 'content' ] = array();
-		$this->flowingBlockAttr[ 'contentWidth' ] = 0;
+                $currContent .= ' ';
+                $cutoffWidth = $contentWidth;
 
-	}
+                $contentWidth += $cw;
 
-	function finishFlowingBlock()
-	{
+                continue;
+            }
 
-		$maxWidth =& $this->flowingBlockAttr[ 'width' ];
+            // try adding another char
+            if ($contentWidth + $cw > $maxWidth) {
 
-		$lineHeight =& $this->flowingBlockAttr[ 'height' ];
+                // won't fit, output what we have
+                $lineCount++;
 
-		$border =& $this->flowingBlockAttr[ 'border' ];
-		$align =& $this->flowingBlockAttr[ 'align' ];
-		$fill =& $this->flowingBlockAttr[ 'fill' ];
+                // contains any content that didn't make it into this print
+                $savedContent = '';
+                $savedFont    = [];
 
-		$content =& $this->flowingBlockAttr[ 'content' ];
-		$font =& $this->flowingBlockAttr[ 'font' ];
+                // first, cut off and save any partial words at the end of the string
+                $words = explode(' ', $currContent);
 
-		// set normal spacing
-		$this->_out( sprintf( '%.3F Tw', 0 ) );
+                // if it looks like we didn't finish any words for this chunk
+                if (count($words) == 1) {
 
-		// print out each chunk
+                    // save and crop off the content currently on the stack
+                    $savedContent = array_pop($content);
+                    $savedFont    = array_pop($font);
 
-		// the amount of space taken up so far in user units
-		$usedWidth = 0;
+                    // trim any trailing spaces off the last bit of content
+                    $currContent =& $content[count($content) - 1];
 
-		foreach ( $content as $k => $chunk )
-		{
+                    $currContent = rtrim($currContent);
+                } // otherwise, we need to find which bit to cut off
+                else {
 
-			$b = '';
+                    $lastContent = '';
 
-			if ( is_int( strpos( $border, 'B' ) ) )
-				$b .= 'B';
+                    for ($w = 0; $w < count($words) - 1; $w++)
+                        $lastContent .= "{$words[ $w ]} ";
 
-			if ( $k == 0 && is_int( strpos( $border, 'L' ) ) )
-				$b .= 'L';
+                    $savedContent = $words[count($words) - 1];
+                    $savedFont    = $this->saveFont();
 
-			if ( $k == count( $content ) - 1 && is_int( strpos( $border, 'R' ) ) )
-				$b .= 'R';
+                    // replace the current content with the cropped version
+                    $currContent = rtrim($lastContent);
+                }
 
-			$this->restoreFont( $font[ $k ] );
+                // update $contentWidth and $cutoffWidth since they changed with cropping
+                $contentWidth = 0;
 
-			// if it's the last chunk of this line, move to the next line after
-			if ( $k == count( $content ) - 1 )
-				$this->Cell( ( $maxWidth / $this->k ) - $usedWidth + 2 * $this->cMargin, $lineHeight, $chunk, $b, 1, $align, $fill );
-			else
-				$this->Cell( $this->GetStringWidth( $chunk ), $lineHeight, $chunk, $b, 0, $align, $fill );
+                foreach ($content as $k => $chunk) {
 
-			$usedWidth += $this->GetStringWidth( $chunk );
+                    $this->restoreFont($font[$k]);
 
-		}
+                    $contentWidth += $this->GetStringWidth($chunk) * $this->k;
+                }
 
-	}
+                $cutoffWidth = $contentWidth;
 
-	function WriteFlowingBlock( $s )
-	{
+                // if it's justified, we need to find the char spacing
+                if ($align == 'J') {
 
-		// width of all the content so far in points
-		$contentWidth =& $this->flowingBlockAttr[ 'contentWidth' ];
+                    // count how many spaces there are in the entire content string
+                    $numSpaces = 0;
 
-		// cell width in points
-		$maxWidth =& $this->flowingBlockAttr[ 'width' ];
+                    foreach ($content as $chunk)
+                        $numSpaces += substr_count($chunk, ' ');
 
-		$lineCount =& $this->flowingBlockAttr[ 'lineCount' ];
+                    // if there's more than one space, find word spacing in points
+                    if ($numSpaces > 0)
+                        $this->ws = ($maxWidth - $cutoffWidth) / $numSpaces;
+                    else
+                        $this->ws = 0;
 
-		// line height in user units
-		$lineHeight =& $this->flowingBlockAttr[ 'height' ];
+                    $this->_out(sprintf('%.3F Tw', $this->ws));
+                } // otherwise, we want normal spacing
+                else
+                    $this->_out(sprintf('%.3F Tw', 0));
 
-		$border =& $this->flowingBlockAttr[ 'border' ];
-		$align =& $this->flowingBlockAttr[ 'align' ];
-		$fill =& $this->flowingBlockAttr[ 'fill' ];
+                // print out each chunk
+                $usedWidth = 0;
 
-		$content =& $this->flowingBlockAttr[ 'content' ];
-		$font =& $this->flowingBlockAttr[ 'font' ];
+                foreach ($content as $k => $chunk) {
 
-		$font[] = $this->saveFont();
-		$content[] = '';
+                    $this->restoreFont($font[$k]);
 
-		$currContent =& $content[ count( $content ) - 1 ];
+                    $stringWidth = $this->GetStringWidth($chunk) + ($this->ws * substr_count($chunk, ' ') / $this->k);
 
-		// where the line should be cutoff if it is to be justified
-		$cutoffWidth = $contentWidth;
+                    // determine which borders should be used
+                    $b = '';
 
-		// for every character in the string
-		for ( $i = 0; $i < strlen( $s ); $i++ )
-		{
+                    if ($lineCount == 1 && is_int(strpos($border, 'T')))
+                        $b .= 'T';
 
-			// extract the current character
-			$c = $s[ $i ];
+                    if ($k == 0 && is_int(strpos($border, 'L')))
+                        $b .= 'L';
 
-			// get the width of the character in points
-			$cw = $this->CurrentFont[ 'cw' ][ $c ] * ( $this->FontSizePt / 1000 );
+                    if ($k == count($content) - 1 && is_int(strpos($border, 'R')))
+                        $b .= 'R';
 
-			if ( $c == ' ' )
-			{
+                    // if it's the last chunk of this line, move to the next line after
+                    if ($k == count($content) - 1)
+                        $this->Cell(($maxWidth / $this->k) - $usedWidth + 2 * $this->cMargin, $lineHeight, $chunk, $b, 1, $align, $fill);
+                    else {
 
-				$currContent .= ' ';
-				$cutoffWidth = $contentWidth;
+                        $this->Cell($stringWidth + 2 * $this->cMargin, $lineHeight, $chunk, $b, 0, $align, $fill);
+                        $this->x -= 2 * $this->cMargin;
+                    }
 
-				$contentWidth += $cw;
+                    $usedWidth += $stringWidth;
+                }
 
-				continue;
+                // move on to the next line, reset variables, tack on saved content and current char
+                $this->restoreFont($savedFont);
 
-			}
+                $font    = [$savedFont];
+                $content = [$savedContent . $s[$i]];
 
-			// try adding another char
-			if ( $contentWidth + $cw > $maxWidth )
-			{
+                $currContent =& $content[0];
 
-				// won't fit, output what we have
-				$lineCount++;
+                $contentWidth = $this->GetStringWidth($currContent) * $this->k;
+                $cutoffWidth  = $contentWidth;
+            } // another character will fit, so add it on
+            else {
 
-				// contains any content that didn't make it into this print
-				$savedContent = '';
-				$savedFont = array();
+                $contentWidth += $cw;
+                $currContent  .= $s[$i];
+            }
+        }
+    }
 
-				// first, cut off and save any partial words at the end of the string
-				$words = explode( ' ', $currContent );
+    function finishFlowingBlock() {
 
-				// if it looks like we didn't finish any words for this chunk
-				if ( count( $words ) == 1 )
-				{
+        $maxWidth =& $this->flowingBlockAttr['width'];
 
-					// save and crop off the content currently on the stack
-					$savedContent = array_pop( $content );
-					$savedFont = array_pop( $font );
+        $lineHeight =& $this->flowingBlockAttr['height'];
 
-					// trim any trailing spaces off the last bit of content
-					$currContent =& $content[ count( $content ) - 1 ];
+        $border =& $this->flowingBlockAttr['border'];
+        $align  =& $this->flowingBlockAttr['align'];
+        $fill   =& $this->flowingBlockAttr['fill'];
 
-					$currContent = rtrim( $currContent );
+        $content =& $this->flowingBlockAttr['content'];
+        $font    =& $this->flowingBlockAttr['font'];
 
-				}
+        // set normal spacing
+        $this->_out(sprintf('%.3F Tw', 0));
 
-				// otherwise, we need to find which bit to cut off
-				else
-				{
+        // print out each chunk
 
-					$lastContent = '';
+        // the amount of space taken up so far in user units
+        $usedWidth = 0;
 
-					for ( $w = 0; $w < count( $words ) - 1; $w++)
-						$lastContent .= "{$words[ $w ]} ";
+        foreach ($content as $k => $chunk) {
 
-					$savedContent = $words[ count( $words ) - 1 ];
-					$savedFont = $this->saveFont();
+            $b = '';
 
-					// replace the current content with the cropped version
-					$currContent = rtrim( $lastContent );
+            if (is_int(strpos($border, 'B')))
+                $b .= 'B';
 
-				}
+            if ($k == 0 && is_int(strpos($border, 'L')))
+                $b .= 'L';
 
-				// update $contentWidth and $cutoffWidth since they changed with cropping
-				$contentWidth = 0;
+            if ($k == count($content) - 1 && is_int(strpos($border, 'R')))
+                $b .= 'R';
 
-				foreach ( $content as $k => $chunk )
-				{
+            $this->restoreFont($font[$k]);
 
-					$this->restoreFont( $font[ $k ] );
+            // if it's the last chunk of this line, move to the next line after
+            if ($k == count($content) - 1)
+                $this->Cell(($maxWidth / $this->k) - $usedWidth + 2 * $this->cMargin, $lineHeight, $chunk, $b, 1, $align, $fill);
+            else
+                $this->Cell($this->GetStringWidth($chunk), $lineHeight, $chunk, $b, 0, $align, $fill);
 
-					$contentWidth += $this->GetStringWidth( $chunk ) * $this->k;
+            $usedWidth += $this->GetStringWidth($chunk);
+        }
+    }
 
-				}
+    function newFlowingBlock($w, $h, $b = 0, $a = 'J', $f = 0) {
 
-				$cutoffWidth = $contentWidth;
+        // cell width in points
+        $this->flowingBlockAttr['width'] = $w * $this->k;
 
-				// if it's justified, we need to find the char spacing
-				if( $align == 'J' )
-				{
+        // line height in user units
+        $this->flowingBlockAttr['height'] = $h;
 
-					// count how many spaces there are in the entire content string
-					$numSpaces = 0;
+        $this->flowingBlockAttr['lineCount'] = 0;
 
-					foreach ( $content as $chunk )
-						$numSpaces += substr_count( $chunk, ' ' );
+        $this->flowingBlockAttr['border'] = $b;
+        $this->flowingBlockAttr['align']  = $a;
+        $this->flowingBlockAttr['fill']   = $f;
 
-					// if there's more than one space, find word spacing in points
-					if ( $numSpaces > 0 )
-						$this->ws = ( $maxWidth - $cutoffWidth ) / $numSpaces;
-					else
-						$this->ws = 0;
+        $this->flowingBlockAttr['font']         = [];
+        $this->flowingBlockAttr['content']      = [];
+        $this->flowingBlockAttr['contentWidth'] = 0;
+    }
 
-					$this->_out( sprintf( '%.3F Tw', $this->ws ) );
+    function restoreFont($saved) {
 
-				}
+        $this->FontFamily  = $saved['family'];
+        $this->FontStyle   = $saved['style'];
+        $this->FontSizePt  = $saved['sizePt'];
+        $this->FontSize    = $saved['size'];
+        $this->CurrentFont =& $saved['curr'];
 
-				// otherwise, we want normal spacing
-				else
-					$this->_out( sprintf( '%.3F Tw', 0 ) );
+        if ($this->page > 0)
+            $this->_out(sprintf('BT /F%d %.2F Tf ET', $this->CurrentFont['i'], $this->FontSizePt));
+    }
 
-				// print out each chunk
-				$usedWidth = 0;
+    function saveFont() {
 
-				foreach ( $content as $k => $chunk )
-				{
+        $saved = [];
 
-					$this->restoreFont( $font[ $k ] );
+        $saved['family'] = $this->FontFamily;
+        $saved['style']  = $this->FontStyle;
+        $saved['sizePt'] = $this->FontSizePt;
+        $saved['size']   = $this->FontSize;
+        $saved['curr']   =& $this->CurrentFont;
 
-					$stringWidth = $this->GetStringWidth( $chunk ) + ( $this->ws * substr_count( $chunk, ' ' ) / $this->k );
-
-					// determine which borders should be used
-					$b = '';
-
-					if ( $lineCount == 1 && is_int( strpos( $border, 'T' ) ) )
-						$b .= 'T';
-
-					if ( $k == 0 && is_int( strpos( $border, 'L' ) ) )
-						$b .= 'L';
-
-					if ( $k == count( $content ) - 1 && is_int( strpos( $border, 'R' ) ) )
-						$b .= 'R';
-
-					// if it's the last chunk of this line, move to the next line after
-					if ( $k == count( $content ) - 1 )
-						$this->Cell( ( $maxWidth / $this->k ) - $usedWidth + 2 * $this->cMargin, $lineHeight, $chunk, $b, 1, $align, $fill );
-					else
-					{
-
-						$this->Cell( $stringWidth + 2 * $this->cMargin, $lineHeight, $chunk, $b, 0, $align, $fill );
-						$this->x -= 2 * $this->cMargin;
-
-					}
-
-					$usedWidth += $stringWidth;
-
-				}
-
-				// move on to the next line, reset variables, tack on saved content and current char
-				$this->restoreFont( $savedFont );
-
-				$font = array( $savedFont );
-				$content = array( $savedContent . $s[ $i ] );
-
-				$currContent =& $content[ 0 ];
-
-				$contentWidth = $this->GetStringWidth( $currContent ) * $this->k;
-				$cutoffWidth = $contentWidth;
-
-			}
-
-			// another character will fit, so add it on
-			else
-			{
-
-				$contentWidth += $cw;
-				$currContent .= $s[ $i ];
-
-			}
-
-		}
-
-	}
+        return $saved;
+    }
 
 }
+
 ?>
