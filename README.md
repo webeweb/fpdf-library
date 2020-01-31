@@ -14,6 +14,9 @@ it for any kind of usage and modify it to suit your needs.
 > releases which are available at: http://www.fpdf.org THERE WILL BE NO
 > DEVELOPMENT IN THIS REPOSITORY !
 
+If you like this package, pay me a beer (or a coffee)
+[![paypal.me](https://img.shields.io/badge/paypal.me-webeweb-0070ba.svg?style=flat-square&logo=paypal)](https://www.paypal.me/webeweb)
+
 ---
 
 ## Compatibility
@@ -34,3 +37,13 @@ $ composer require webeweb/fpdf-library
 This command requires you to have Composer installed globally, as explained in
 the [installation chapter](https://getcomposer.org/doc/00-intro.md) of the
 Composer documentation.
+
+## License
+
+`fpdf-library` is released under the MIT License. See the bundled [LICENSE](license.txt)
+file for details.
+
+## Donate
+
+If you like this work, please consider donating at
+[![paypal.me](https://img.shields.io/badge/paypal.me-webeweb-0070ba.svg?style=flat-square&logo=paypal)](https://www.paypal.me/webeweb)
