@@ -2,18 +2,23 @@
     "name": "webeweb/fpdf-library",
     "type": "library",
     "description": "Integrate FPDF with your projects",
-    "keywords": ["webeweb", "library", "FPDF", "PDF"],
+    "keywords": [
+        "FPDF",
+        "library",
+        "PDF",
+        "webeweb"
+    ],
     "homepage": "https://github.com/webeweb/fpdf-library",
-    "license": "LGPL-3.0-only",
+    "license": "MIT",
     "authors": [
-        {
-            "name": "webeweb",
-            "homepage": "https://github.com/webeweb/"
-        },
         {
             "name": "Olivier Plathey",
             "email": "oliver@fpdf.org",
             "homepage": "http://fpdf.org/"
+        },
+        {
+            "name": "webeweb",
+            "homepage": "https://github.com/webeweb/"
         }
     ],
     "require": {
